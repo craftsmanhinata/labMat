@@ -21,3 +21,4 @@
 *.fig -crlf -diff -merge
 *.txt -crlf -diff -merge
 *.png -crlf -diff -merge
+*.emt -crlf -diff -merge
