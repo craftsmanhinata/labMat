@@ -1,0 +1,12 @@
+clc;
+clear;
+fileName = '0001~aa~0628';
+extension = '.emt';
+outputExtension = '.csv';
+data = dlmread(strcat(fileName,extension),'\t',11,1);
+outputDir = 'emtOutput\';
+csvwrite(strcat(outputDir,fileName,outputExtension),data);
+time = data(:,1);
+ECGData = data(:,2);
+figure();
+plot(time,ECGData);
