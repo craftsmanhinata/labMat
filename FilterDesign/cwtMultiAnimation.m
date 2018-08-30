@@ -88,5 +88,14 @@ if animeEnable
         hold off;
     end
 end
+%fb = cwtfilterbank('Wavelet','morse','TimeBandwidth',cwtTimeBandWidth,'VoicesPerOctave',cwtVoicesPerOctave,'SamplingFrequency',Fs,'FrequencyLimits',freqLimits);
+%figure();
+%freqz(fb);
+%xlim([0 max(freqLimits)]);
+%title('');
+%ylabel('Magnitude','FontSize',26);
+%xlabel('Frequency(Hz)','FontSize',26);
+%gca.FontSize = 26;
+%
 end
 
