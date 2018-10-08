@@ -1,4 +1,4 @@
-function [] = getWavelets(wname,scales)
+function [] = getWavelets(wname,scales,samplingFreq)
 %UNTITLED スケール変調したウェーブレットをplotする関数
 %   詳細説明をここに記述
 WT_Check = 5; % WTが5のとき, スケーリング関数(ファザーウェーブレット)を含まない複素ウェーブレットである
@@ -27,9 +27,14 @@ for scaleIndex = 1 : length(scales)
         (scaleCoeffA*WaveSamplingPeriod));
     wavelet = 1/sqrt(scaleCoeffA) * Wave(waveIndex);
     waveletTime = timeWave(waveIndex)*scaleCoeffA-(EndTime / 2 * (scaleCoeffA - 1));
-    curPeriod = waveletTime(2) - waveletTime(1);
+    %[resampleWavelet,resampleWaveletTime] = resample(wavelet,waveletTime,samplingFreq,'spline');
+    
+    %
+    %plot(resampleWaveletTime,real(resampleWavelet));
+    %hold on;
     plot(waveletTime,real(wavelet));
     hold on;
 end
+
 end
 

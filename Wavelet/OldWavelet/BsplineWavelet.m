@@ -17,10 +17,10 @@ plot(t,data);
 
 % ü”g”ŒvZ
 fs = 1/samplingPeriod;
-wname = 'fbsp3-0.1-0.2';
+wname = 'fbsp3-0.05-0.2';
 
-scale =1:20;
-getWavelets(wname,scale);
+scale =1:30;
+getWavelets(wname,scale,fs);
 
 
 
