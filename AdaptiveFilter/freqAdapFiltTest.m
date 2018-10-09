@@ -26,7 +26,7 @@ figure();
 plot(time,mixedData);
 title('Mixed Signal');
 
-mu = 0.1;
+mu = 0.0001;
 fdaf = dsp.FrequencyDomainAdaptiveFilter('Length',blockLength,...
     'BlockLength',blockLength,'StepSize',mu);
 [y,err] = fdaf(mixedData,noiseData);
@@ -43,9 +43,12 @@ plot(time,noiseData);
 legend('Filtered Signal','Original Signal','Mixed Signal','Noise');
 
 
-fftres = fft(err);
+fftres = fft(y);
 fftres = abs(fftres);
 fftres = fftshift(fftres);
 f = Fs*(-(length(fftres)/2):(length(fftres)/2-1))/length(fftres);
 figure();
 plot(f,fftres);
+
+figure();
+plot(time,mixedData-y);
