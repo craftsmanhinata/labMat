@@ -26,7 +26,7 @@ mixedData = Data + noiseData + randn(length(Data),1)';
 
 
 lmsFilt = dsp.LMSFilter('Length',128,'Method','Normalized LMS', ...
-    'StepSize',0.01);
+    'StepSize',0.1);
 [y,err] = lmsFilt(noiseData',mixedData');
 
 fftres = fft(y);
