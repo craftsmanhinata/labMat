@@ -13,7 +13,7 @@ newYTickLabel = ones(length(ytickLabelStr),1);
 for labelIndex = 1:length(ytickLabelStr)
     LabelItem = cell2mat(ytickLabelStr(labelIndex));
     ytickLabelNum(labelIndex) = str2double(LabelItem);
-    newYTickLabel(labelIndex) = frequencies(scales==ytickLabelNum(labelIndex));
+    newYTickLabel(labelIndex) = frequencies(knnsearch(scales',ytickLabelNum(labelIndex)));
 end
 yticklabels(newYTickLabel);
 ylabel("Approx frequency(Hz)");

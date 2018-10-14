@@ -1,13 +1,14 @@
 function [] = getWavelets(wname,scales,samplingFreq)
 %UNTITLED スケール変調したウェーブレットをplotする関数
 %   詳細説明をここに記述
-WT_Check = 5; % WTが5のとき, スケーリング関数(ファザーウェーブレット)を含まない複素ウェーブレットである
+WT_Check_1 = 5; % WTが5のとき, スケーリング関数(ファザーウェーブレット)を含まない複素ウェーブレットである
+WT_Check_2 = 4; % WTが4のとき, スケーリング関数(ファザーウェーブレット)を含まない実数ウェーブレットである
 precis = 10; %計算精度.waveの長さを制御する. wave長は2^precis
 
 figure();
 
 WT = wavemngr('type',wname);
-if(WT_Check ~= WT)
+if(WT_Check_1 ~= WT)&&(WT_Check_2 ~= WT)
     msgID = 'GETWAVELET:InvalidWaveletmae';
     msg = strcat(wname,'はこの関数で使用できないウェーブレットです.');
     baseException = MException(msgID,msg);
