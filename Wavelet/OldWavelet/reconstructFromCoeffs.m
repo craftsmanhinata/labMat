@@ -16,8 +16,10 @@ maxAmp = abs(psi(knnsearch(time',0)));
 %CDeltaは再構成の様子を見ながら変更する
 %ex: CDelta = 1.996(DOG m = 6)
 CDelta = getNormalizationConstantDelta(wname,samplingPeriod,VoicesPerOctave,maxAmp);
+reconNorm = (CDelta*maxAmp*VoicesPerOctave)^-1;
+reconNorm = reconNorm * sqrt(samplingPeriod);
 
 reconstructionSignal = sum(real(coeffMatrix).*scalingCoeffs);
-reconstructionSignal = reconstructionSignal * (sqrt(samplingPeriod) / VoicesPerOctave / maxAmp / CDelta);
+reconstructionSignal = reconstructionSignal .* reconNorm;
 end
 

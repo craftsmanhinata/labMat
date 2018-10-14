@@ -16,8 +16,7 @@ data = [sin(2 * pi * f1 * t(1:ceil(end/2)))  sin(2 * pi * f2 * t(ceil(end/2)+1:e
 
 % ü”g”ŒvZ
 fs = 1/samplingPeriod;
-wname = 'fbsp3-0.05-0.2';
-wname = 'cmor2-3';
+wname = 'fbsp3-0.1-0.1';
 
 voicesPerOctave = 48;
 scales = scalesAutoSet(wname,samplingPeriod,[0.1 50],voicesPerOctave);
@@ -28,13 +27,7 @@ getWavelets(wname,scales,fs);
 
 
 [coefs, frequencies] = cwt(data, scales, wname, samplingPeriod);%ŒW”‚Æü”g”‚ğ‚©‚¦‚·
-%imagesc(abs(coefs));
-% freq = scal2frq(scale, 'fbsp3-1-0.5', samplingPeriod);
 
-%”½“]
-% flipudFrequencies = flipud(frequencies');
-% flipudCoefs = flipud(abs(coefs));
-%figure;
 
 %ƒXƒPƒƒOƒ‰ƒ€
 plotScaleogram2(coefs,t,frequencies);
@@ -45,4 +38,6 @@ figure();
 plot(t,data);
 hold on;
 plot(t,reconSig);
+
+
 
