@@ -24,7 +24,7 @@ maxScale =  scaleOneFreq / min(freqRange);
 scaleStepParam = 1 / voicesPerOctave;
 
 
-%スケール係数列のサイズの計算
+%5
 scaleNum = ceil(voicesPerOctave * log2(maxScale/minScale));
 
 scale = minScale * 2 .^ (scaleStepParam * (0:1:scaleNum - 1));
