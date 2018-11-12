@@ -1,3 +1,4 @@
+%dspic用のフィルタ設計プログラムexample
 Fs = 200;
 Ts = 1 / Fs;
 
@@ -24,3 +25,10 @@ filterDelayTime = Ts * filterGroupDelay;
 
 fixFilt = float2Fract(Hd.numerator);
 fixFilt = fract2HexStr(fixFilt);
+fixFilt = cellfun(@cell2mat,fixFilt,'UniformOutput',false);
+fixFilt = char(fixFilt);
+
+fileID = fopen('fileterOut.txt','w');
+fixFilt = strcat(fixFilt,',');
+fprintf(fileID,'%c',fixFilt');
+fclose(fileID);
