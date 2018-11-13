@@ -3,7 +3,7 @@ clear();
 clc();
 
 
-fileName = '20181113_101542_Test';
+fileName = '20181113_200619_Test';
 srcFolderName = '.\Data\';
 dstFolderName = '.\Out\';
 fileExtension = '.csv';
@@ -163,4 +163,4 @@ csvwrite(strcat(dstFolderName,saveName,fileExtension),dstData);
 % hold on;
 % plot(time,PPGSig);
 
-%FFTautoPlot(PPGSig,Fs);
+FFTautoPlot(PPGSig,Fs);
