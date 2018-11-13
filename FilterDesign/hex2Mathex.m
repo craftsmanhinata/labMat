@@ -1,6 +1,6 @@
 function [matHex] = hex2Mathex(hex)
-%HEX2MATHEX この関数の概要をここに記述
-%   詳細説明をここに記述
+%HEX2MATHEX hexを読み込んだ際につく接頭辞の0xを削除する関数
+%   0xを削除する
 matHex = erase(hex,'0x');
 end
 
