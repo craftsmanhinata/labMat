@@ -3,7 +3,7 @@ clear();
 clc();
 
 
-fileName = '20181113_200619_Test';
+fileName = '20181114_170553_GAIN100';
 srcFolderName = '.\Data\';
 dstFolderName = '.\Out\';
 fileExtension = '.csv';
