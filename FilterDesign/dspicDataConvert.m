@@ -4,7 +4,7 @@ clc();
 
 %0x8000 min
 %0x7fff max
-fileName = '20181116_163727_Test';
+fileName = '20181117_013538_Test';
 srcFolderName = '.\Data\';
 dstFolderName = '.\Out\';
 fileExtension = '.csv';
@@ -97,10 +97,10 @@ highFreqMargin = 1.1;
 lowFreqMargin = 1.16;
 Ap = 1.0;
 
-% D = fdesign.bandpass('Fst1,Fp1,Fp2,Fst2,Ast1,Ap,Ast2',NFlc,NFlc*lowFreqMargin,NFhc,NFhc*highFreqMargin,-1*minResVoldb,Ap,-1*minResVoldb);
-% Hd = design(D,'equiripple');
-% %PPGSig = filtfilt(Hd.numerator,1,PPGSig);
-% PPGSig = filter(Hd,PPGSig);
+D = fdesign.bandpass('Fst1,Fp1,Fp2,Fst2,Ast1,Ap,Ast2',NFlc,NFlc*lowFreqMargin,NFhc,NFhc*highFreqMargin,-1*minResVoldb,Ap,-1*minResVoldb);
+Hd = design(D,'equiripple');
+%PPGSig = filtfilt(Hd.numerator,1,PPGSig);
+PPGSig = filter(Hd,PPGSig);
 
 figure();
 subplot(7,1,1);
