@@ -1,10 +1,9 @@
-close all;
 clear();
 clc();
 
 %0x8000 min
 %0x7fff max
-fileName = '20181117_013538_Test';
+fileName = '20181117_194006_Test';
 srcFolderName = '.\Data\';
 dstFolderName = '.\Out\';
 fileExtension = '.csv';
@@ -74,9 +73,9 @@ switch gyroRange
         gyroCoeff = 70;
 end
 
-xGyro = deg2rad(xGyro * gyroCoeff / 1000);
-yGyro = deg2rad(yGyro * gyroCoeff / 1000);
-zGyro = deg2rad(zGyro * gyroCoeff / 1000);
+xGyro = mydeg2rad(xGyro * gyroCoeff / 1000);
+yGyro = mydeg2rad(yGyro * gyroCoeff / 1000);
+zGyro = mydeg2rad(zGyro * gyroCoeff / 1000);
 
 Fs = 50;
 Ts = 1/Fs;
@@ -99,8 +98,9 @@ Ap = 1.0;
 
 D = fdesign.bandpass('Fst1,Fp1,Fp2,Fst2,Ast1,Ap,Ast2',NFlc,NFlc*lowFreqMargin,NFhc,NFhc*highFreqMargin,-1*minResVoldb,Ap,-1*minResVoldb);
 Hd = design(D,'equiripple');
-%PPGSig = filtfilt(Hd.numerator,1,PPGSig);
+% PPGSig = filtfilt(Hd.numerator,1,PPGSig);
 PPGSig = filter(Hd,PPGSig);
+PPGSig = detrend(PPGSig);
 
 figure();
 subplot(7,1,1);
@@ -143,7 +143,7 @@ plot(time,xGyro);
 title('X Gyro Signal');
 xlabel('Time[sec]');
 ylabel('Angular velocity [rad/s]');
-ylim([deg2rad(-gyroRange*gyroCoeff),deg2rad(gyroRange*gyroCoeff)]);
+ylim([mydeg2rad(-gyroRange),mydeg2rad(gyroRange)]);
 
 
 subplot(7,1,6);
@@ -151,7 +151,7 @@ plot(time,yGyro);
 title('Y Gyro Signal');
 xlabel('Time[sec]');
 ylabel('Angular velocity [rad/s]');
-ylim([deg2rad(-gyroRange*gyroCoeff),deg2rad(gyroRange*gyroCoeff)]);
+ylim([mydeg2rad(-gyroRange),mydeg2rad(gyroRange)]);
 
 
 subplot(7,1,7);
@@ -159,7 +159,7 @@ plot(time,zGyro);
 title('Z Gyro Signal');
 xlabel('Time[sec]');
 ylabel('Angular velocity [rad/s]');
-ylim([deg2rad(-gyroRange*gyroCoeff),deg2rad(gyroRange*gyroCoeff)]);
+ylim([mydeg2rad(-gyroRange),mydeg2rad(gyroRange)]);
 
 
 dstData = ones(height(srcData),7);
