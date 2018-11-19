@@ -1,6 +1,6 @@
 clc;
 clear;
-fileName = '0001~aa~0628';
+fileName = '2018111703_walk';
 extension = '.emt';
 outputExtension = '.csv';
 data = dlmread(strcat(fileName,extension),'\t',11,1);

@@ -3,7 +3,7 @@ clc();
 
 %0x8000 min
 %0x7fff max
-fileName = '20181117_194006_Test';
+fileName = '20181117_205204_DataStay3';
 srcFolderName = '.\Data\';
 dstFolderName = '.\Out\';
 fileExtension = '.csv';
@@ -95,12 +95,12 @@ minResVoldb = minResVoldb + margin;
 highFreqMargin = 1.1;
 lowFreqMargin = 1.16;
 Ap = 1.0;
-
-D = fdesign.bandpass('Fst1,Fp1,Fp2,Fst2,Ast1,Ap,Ast2',NFlc,NFlc*lowFreqMargin,NFhc,NFhc*highFreqMargin,-1*minResVoldb,Ap,-1*minResVoldb);
-Hd = design(D,'equiripple');
-% PPGSig = filtfilt(Hd.numerator,1,PPGSig);
-PPGSig = filter(Hd,PPGSig);
-PPGSig = detrend(PPGSig);
+% 
+% D = fdesign.bandpass('Fst1,Fp1,Fp2,Fst2,Ast1,Ap,Ast2',NFlc,NFlc*lowFreqMargin,NFhc,NFhc*highFreqMargin,-1*minResVoldb,Ap,-1*minResVoldb);
+% Hd = design(D,'equiripple');
+% % PPGSig = filtfilt(Hd.numerator,1,PPGSig);
+% PPGSig = filter(Hd,PPGSig);
+% PPGSig = detrend(PPGSig);
 
 figure();
 subplot(7,1,1);
