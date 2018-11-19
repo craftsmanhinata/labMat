@@ -1,8 +1,10 @@
+%RRIÇ∆PIÇÃî‰ärÇÇ∑ÇÈ
+%éËèá;ECGÇ¬ÇØÇÈ,Å@ÇµÇŒÇÁÇ≠ë“Ç¬, PPGÇ¬ÇØÇÈ, PPGè¡Ç∑, ECGè¡Ç∑
 close all;
 clear();
 clc();
 
-PPGInvOn = true;
+PPGInvOn = false;
 
 Fs = 50;
 Ts = 1 / Fs;
@@ -38,9 +40,9 @@ PPGData = csvread(strcat(PPGFolder,fileNamePPG));
 PPG = PPGData(:,1);
 PPGTime = (0:1:length(PPG)-1)'*Ts;
 
-fhc = 3; %unit:[Hz]
+fhc = 1; %unit:[Hz]
 NFhc = fhc/(Fs/2);
-flc = 0.3;
+flc = 0.1;
 NFlc = flc/(Fs/2);
 adcBit = 12;
 maxVoltage = 3.3;
@@ -64,7 +66,7 @@ end
 subplot(2,1,2);
 plot(PPGTime,PPG);
 
-[PPGPks,PPGPksTime] = findpeaks(PPG,PPGTime,'MinPeakDistance',0.3);
+[PPGPks,PPGPksTime] = findpeaks(PPG,PPGTime,'MinPeakDistance',min(dRRI)*0.9);
 hold on;
 set(gca,'FontSize',40);
 plot(PPGPksTime,PPGPks,'ko');
@@ -83,6 +85,8 @@ disp(strcat('ëää÷åWêî:',num2str(R(1,2))));
 
 
 [R,P,D]=movingCorrcoef(PI,dRRI);
+disp(strcat('movingÇ…ÇÊÇÈëää÷åWêî:',num2str(R(1,2))));
+
 % figure();
 % plot(2:1:length(dRRI)+1,dRRI);
 % hold on;

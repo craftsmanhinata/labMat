@@ -1,3 +1,4 @@
+%dspic‚ÅŽæ‚Á‚½ƒf[ƒ^‚ðˆµ‚¢‚â‚·‚¢‚æ‚¤‚É•ÏŠ·‚·‚é
 clear();
 clc();
 

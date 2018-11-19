@@ -1,3 +1,4 @@
+%筋電計のデータをcsvに変換する
 clc;
 clear;
 srcFolderName = '.\ECGRawData\';
