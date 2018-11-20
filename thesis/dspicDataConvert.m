@@ -4,7 +4,7 @@ clc();
 
 %0x8000 min
 %0x7fff max
-fileName = '20181117_193317_Test';
+fileName = '20181120_020912_Data';
 srcFolderName = '.\PPGRawData\';
 dstFolderName = '.\PPG\';
 fileExtension = '.csv';
