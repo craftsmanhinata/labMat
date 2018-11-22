@@ -28,15 +28,15 @@ filteredSignal = filter(b,1,signal);
 Noise = 0.1 * randn(1,dataLength);
 
 %ëºÇÃêMçÜÇÃê∂ê¨
-otherSignal = cos(2 * pi * 20 * signalTime);
+otherSignal = cos(2 * pi * 15 * signalTime);
 
 ObservedSignal = filteredSignal + Noise + otherSignal;
 
 hold on;
 plot(signalTime,ObservedSignal);
 
-mu = 0.1;
-fdaf = dsp.FrequencyDomainAdaptiveFilter('Length',128,'StepSize',mu);
+mu = 0.01;
+fdaf = dsp.FrequencyDomainAdaptiveFilter('Length',BlockLength,'StepSize',mu);
 [y, e] = fdaf(ObservedSignal,signal);
 fftCoeffs = fdaf.FFTCoefficients;
 
@@ -45,7 +45,26 @@ hold on;
 IfilterCoeff = ifft(fftCoeffs);
 %IfilterCoeff = (fftCoeffs);
 stem(real(IfilterCoeff));
-fvtool(IfilterCoeff,'Fs',Fs);
+legend('Unknown System','FDAF');
+
+fvtool(real(IfilterCoeff),'Fs',Fs);
 figure(signalFig);
 plot(signalTime,y);
+legend('InputSignal','ObservedSignal','AdaptiveFilterOutput');
+
+[spectY,~] = FFTAuto(y,Fs);
+[spectOrig,~] = FFTAuto(signal,Fs);
+[spectObserve,freq] = FFTAuto(ObservedSignal,Fs);
+spectY = abs(spectY);
+spectY(2:end-1) = 2 * spectY(2:end-1);
+spectOrig = abs(spectOrig);
+spectOrig(2:end-1) = 2 * spectOrig(2:end-1);
+spectObserve = abs(spectObserve);
+spectObserve(2:end-1) = 2 * spectObserve(2:end-1);
+figure();
+plot(freq,spectOrig);
+hold on;
+plot(freq,spectObserve);
+plot(freq,spectY);
+legend('InputSignal','OutputSignal','AdaptiveFilterOutput');
 
