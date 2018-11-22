@@ -2,7 +2,7 @@ clear;
 close all;
 clc;
 
-BlockLength = 128;
+BlockLength = 128 * 2;
 
 %未知システムの生成
 Fs = 50;
