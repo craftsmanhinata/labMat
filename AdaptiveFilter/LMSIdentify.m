@@ -64,3 +64,9 @@ hold on;
 plot(freq,spectObserve);
 plot(freq,spectY);
 legend('InputSignal','OutputSignal','AdaptiveFilterOutput');
+
+figure();
+[e,~] = FFTAuto(e,Fs);
+e = abs(e);
+e(2:end-1) = 2 * e(2:end-1);
+plot(freq,e);
