@@ -48,10 +48,10 @@ PPG = detrend(PPGData(:,1));
 
 
 % fhc = 1.4; %unit:[Hz]
-fhc = 1.5;
+fhc = 1.4;
 NFhc = fhc/(Fs/2);
 % flc = 1.1;
-flc = 1.0;
+flc = 1.1;
 NFlc = flc/(Fs/2);
 
 b = fir1(3000,[NFlc NFhc]);
@@ -65,6 +65,7 @@ PPGTime = (0:1:length(FilteredPPG)-1)'*Ts;
 if PPGInvOn
     FilteredPPG = FilteredPPG * -1;
 end
+
 % PPGSig = filter(Hd,PPGSig);
 figure(origFig);
 subplot(2,1,2);
@@ -94,12 +95,14 @@ legend('PI','RRI');
 
 figure();
 plot(PPGTime,PPG);
-hold on;
+yyaxis right;
 plot(PPGTime,FilteredPPG);
 
 
 figure();
 plot(PPGTime,FilteredPPG);
+hold on;
+plot(PPGPksTime,PPGPks,'ko');
 yyaxis right;
 plot((0:1:length(outputECG)-1)*Ts,outputECG);
 
