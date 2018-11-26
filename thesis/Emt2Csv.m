@@ -2,7 +2,7 @@
 clc;
 clear;
 srcFolderName = '.\ECGRawData\';
-fileName = '0001~aa~20181120';
+fileName = '0001~ad~2018112405';
 extension = '.emt';
 outputExtension = '.csv';
 data = dlmread(strcat(srcFolderName,fileName,extension),'\t',11,1);
