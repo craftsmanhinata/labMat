@@ -12,8 +12,8 @@ Ts = 1 / Fs;
 RHR = 69;
 
 ECGFolder = 'ECG\';
-fileNameECG = '2018112403move01.csv';
-fileNamePPG = '20181124_195525_Move01.csv';
+fileNameECG = '2018112405move02.csv';
+fileNamePPG = '20181124_200643_Move02.csv';
 ECGData = csvread(strcat(ECGFolder,fileNameECG));
 ECG = ECGData(:,2);
 
