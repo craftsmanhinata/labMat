@@ -104,63 +104,114 @@ zGyro = PPGData(:,7);
 zGyro = trimSig(zGyro,Fs,procTime);
 
 %dは観測信号, xは外乱, eを脈波として使用する
-LMSFilterLength = 64;
-LMSStepSize = 0.01;
-lmsXAcc = dsp.LMSFilter('Length',LMSFilterLength,'StepSize',LMSStepSize,'Method','Normalized LMS');
-[~,adaptPPGXAcc] = lmsXAcc(xAcc,PPG);
-[adaptPPGXAccSpectrum,~,~] = spectrogram(adaptPPGXAcc,hann(FFTLength),Overlap,FFTLength,Fs); 
-adaptPPGXAccSpectrum = convertOneSidedSpectrum(adaptPPGXAccSpectrum,FFTLength);
-[estimateAdaptXAccPulseRate]= getHRFromSpectrum(adaptPPGXAccSpectrum,freq,freqRange,RHR);
-estimateAdaptXAccPulseRate = estimateAdaptXAccPulseRate * 60;
-adaptXAccError = sqrt(immse(estimateAdaptXAccPulseRate,realHR));
+[adaptLMSPPGXAccSpectrum,adaptLMSPPGXAcc]= GetSpectrumUsingLMSFilt(xAcc,PPG,FFTLength,Overlap,Fs);
+[estimateLMSAdaptXAccPulseRate]= getHRFromSpectrum(adaptLMSPPGXAccSpectrum,freq,freqRange,RHR);
+estimateLMSAdaptXAccPulseRate = estimateLMSAdaptXAccPulseRate * 60;
+adaptLMSXAccError = sqrt(immse(estimateLMSAdaptXAccPulseRate,realHR));
 figure(HRFig);
-plot(FilteredPPGSpectrumTime,estimateAdaptXAccPulseRate);
+plot(FilteredPPGSpectrumTime,estimateLMSAdaptXAccPulseRate);
 legend('HR estimated from STFT','HR calculated from peaks','PR estimated from STFT(Raw data)','PR estimated from STFT using FIR filter',...
     'PR estimated from STFT using NLMS(xAcc Only)');
-disp(strcat('STFT(using NLMS xAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptXAccError)));
+disp(strcat('STFT(using NLMS xAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptLMSXAccError)));
 
-lmsYAcc = dsp.LMSFilter('Length',LMSFilterLength,'StepSize',LMSStepSize,'Method','Normalized LMS');
-[~,adaptPPGYAcc] = lmsYAcc(yAcc,PPG);
-[adaptPPGYAccSpectrum,~,~] = spectrogram(adaptPPGYAcc,hann(FFTLength),Overlap,FFTLength,Fs); 
-adaptPPGYAccSpectrum = convertOneSidedSpectrum(adaptPPGYAccSpectrum,FFTLength);
-[estimateAdaptYAccPulseRate]= getHRFromSpectrum(adaptPPGYAccSpectrum,freq,freqRange,RHR);
-estimateAdaptYAccPulseRate = estimateAdaptYAccPulseRate * 60;
-adaptYAccError = sqrt(immse(estimateAdaptYAccPulseRate,realHR));
-disp(strcat('STFT(using NLMS yAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptYAccError)));
+[adaptLMSPPGYAccSpectrum,adaptLMSPPGYAcc]= GetSpectrumUsingLMSFilt(yAcc,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptLMSYAccPulseRate]= getHRFromSpectrum(adaptLMSPPGYAccSpectrum,freq,freqRange,RHR);
+estimateAdaptLMSYAccPulseRate = estimateAdaptLMSYAccPulseRate * 60;
+adaptLMSYAccError = sqrt(immse(estimateAdaptLMSYAccPulseRate,realHR));
+disp(strcat('STFT(using NLMS yAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptLMSYAccError)));
 
-lmsZAcc = dsp.LMSFilter('Length',LMSFilterLength,'StepSize',LMSStepSize,'Method','Normalized LMS');
-[~,adaptPPGZAcc] = lmsZAcc(zAcc,PPG);
-[adaptPPGZAccSpectrum,~,~] = spectrogram(adaptPPGZAcc,hann(FFTLength),Overlap,FFTLength,Fs); 
-adaptPPGZAccSpectrum = convertOneSidedSpectrum(adaptPPGZAccSpectrum,FFTLength);
-[estimateAdaptZAccPulseRate]= getHRFromSpectrum(adaptPPGZAccSpectrum,freq,freqRange,RHR);
-estimateAdaptZAccPulseRate = estimateAdaptZAccPulseRate * 60;
-adaptZAccError = sqrt(immse(estimateAdaptZAccPulseRate,realHR));
-disp(strcat('STFT(using NLMS zAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptZAccError)));
+[adaptLMSPPGZAccSpectrum,adaptLMSPPGZAcc]= GetSpectrumUsingLMSFilt(zAcc,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptLMSZAccPulseRate]= getHRFromSpectrum(adaptLMSPPGZAccSpectrum,freq,freqRange,RHR);
+estimateAdaptLMSZAccPulseRate = estimateAdaptLMSZAccPulseRate * 60;
+adaptLMSZAccError = sqrt(immse(estimateAdaptLMSZAccPulseRate,realHR));
+disp(strcat('STFT(using NLMS zAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptLMSZAccError)));
 
-lmsXGyro = dsp.LMSFilter('Length',LMSFilterLength,'StepSize',LMSStepSize,'Method','Normalized LMS');
-[~,adaptPPGXGyro] = lmsXGyro(xGyro,PPG);
-[adaptPPGXGyroSpectrum,~,~] = spectrogram(adaptPPGXGyro,hann(FFTLength),Overlap,FFTLength,Fs); 
-adaptPPGXGyroSpectrum = convertOneSidedSpectrum(adaptPPGXGyroSpectrum,FFTLength);
-[estimateAdaptXGyroPulseRate]= getHRFromSpectrum(adaptPPGXGyroSpectrum,freq,freqRange,RHR);
-estimateAdaptXGyroPulseRate = estimateAdaptXGyroPulseRate * 60;
-adaptXGyroError = sqrt(immse(estimateAdaptXGyroPulseRate,realHR));
-disp(strcat('STFT(using NLMS xGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptXGyroError)));
+[adaptLMSPPGXGyroSpectrum,adaptLMSPPGXGyro]= GetSpectrumUsingLMSFilt(xGyro,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptLMSXGyroPulseRate]= getHRFromSpectrum(adaptLMSPPGXGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptLMSXGyroPulseRate = estimateAdaptLMSXGyroPulseRate * 60;
+adaptLMSXGyroError = sqrt(immse(estimateAdaptLMSXGyroPulseRate,realHR));
+disp(strcat('STFT(using NLMS xGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptLMSXGyroError)));
 
-lmsYGyro = dsp.LMSFilter('Length',LMSFilterLength,'StepSize',LMSStepSize,'Method','Normalized LMS');
-[~,adaptPPGYGyro] = lmsYGyro(yGyro,PPG);
-[adaptPPGYGyroSpectrum,~,~] = spectrogram(adaptPPGYGyro,hann(FFTLength),Overlap,FFTLength,Fs); 
-adaptPPGYGyroSpectrum = convertOneSidedSpectrum(adaptPPGYGyroSpectrum,FFTLength);
-[estimateAdaptYGyroPulseRate]= getHRFromSpectrum(adaptPPGYGyroSpectrum,freq,freqRange,RHR);
-estimateAdaptYGyroPulseRate = estimateAdaptYGyroPulseRate * 60;
-adaptYGyroError = sqrt(immse(estimateAdaptYGyroPulseRate,realHR));
-disp(strcat('STFT(using NLMS yGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptYGyroError)));
+[adaptLMSPPGYGyroSpectrum,adaptLMSPPGYGyro]= GetSpectrumUsingLMSFilt(yGyro,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptLMSYGyroPulseRate]= getHRFromSpectrum(adaptLMSPPGYGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptLMSYGyroPulseRate = estimateAdaptLMSYGyroPulseRate * 60;
+adaptLMSYGyroError = sqrt(immse(estimateAdaptLMSYGyroPulseRate,realHR));
+disp(strcat('STFT(using NLMS yGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptLMSYGyroError)));
 
-lmsZGyro = dsp.LMSFilter('Length',LMSFilterLength,'StepSize',LMSStepSize,'Method','Normalized LMS');
-[~,adaptPPGZGyro] = lmsZGyro(zGyro,PPG);
-[adaptPPGZGyroSpectrum,~,~] = spectrogram(adaptPPGZGyro,hann(FFTLength),Overlap,FFTLength,Fs); 
-adaptPPGZGyroSpectrum = convertOneSidedSpectrum(adaptPPGZGyroSpectrum,FFTLength);
-[estimateAdaptZGyroPulseRate]= getHRFromSpectrum(adaptPPGZGyroSpectrum,freq,freqRange,RHR);
-estimateAdaptZGyroPulseRate = estimateAdaptZGyroPulseRate * 60;
-adaptZGyroError = sqrt(immse(estimateAdaptZGyroPulseRate,realHR));
-disp(strcat('STFT(using NLMS yGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptZGyroError)));
+[adaptLMSPPGZGyroSpectrum,adaptLMSPPGZGyro]= GetSpectrumUsingLMSFilt(zGyro,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptLMSZGyroPulseRate]= getHRFromSpectrum(adaptLMSPPGZGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptLMSZGyroPulseRate = estimateAdaptLMSZGyroPulseRate * 60;
+adaptLMSZGyroError = sqrt(immse(estimateAdaptLMSZGyroPulseRate,realHR));
+disp(strcat('STFT(using NLMS zGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptLMSZGyroError)));
 
+[adaptRLSPPGXAccSpectrum,adaptRLSPPGXAcc]= GetSpectrumUsingRLSFilt(xAcc,PPG,FFTLength,Overlap,Fs);
+[estimateRLSAdaptXAccPulseRate]= getHRFromSpectrum(adaptRLSPPGXAccSpectrum,freq,freqRange,RHR);
+estimateRLSAdaptXAccPulseRate = estimateRLSAdaptXAccPulseRate * 60;
+adaptRLSXAccError = sqrt(immse(estimateRLSAdaptXAccPulseRate,realHR));
+disp(strcat('STFT(using RLS xAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptRLSXAccError)));
+
+[adaptRLSPPGYAccSpectrum,adaptRLSPPGYAcc]= GetSpectrumUsingRLSFilt(yAcc,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptRLSYAccPulseRate]= getHRFromSpectrum(adaptRLSPPGYAccSpectrum,freq,freqRange,RHR);
+estimateAdaptRLSYAccPulseRate = estimateAdaptRLSYAccPulseRate * 60;
+adaptRLSYAccError = sqrt(immse(estimateAdaptRLSYAccPulseRate,realHR));
+disp(strcat('STFT(using RLS yAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptRLSYAccError)));
+
+[adaptRLSPPGZAccSpectrum,adaptRLSPPGZAcc]= GetSpectrumUsingRLSFilt(zAcc,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptRLSZAccPulseRate]= getHRFromSpectrum(adaptRLSPPGZAccSpectrum,freq,freqRange,RHR);
+estimateAdaptRLSZAccPulseRate = estimateAdaptRLSZAccPulseRate * 60;
+adaptRLSZAccError = sqrt(immse(estimateAdaptRLSZAccPulseRate,realHR));
+disp(strcat('STFT(using RLS zAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptRLSZAccError)));
+
+[adaptRLSPPGXGyroSpectrum,adaptRLSPPGXGyro]= GetSpectrumUsingRLSFilt(xGyro,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptRLSXGyroPulseRate]= getHRFromSpectrum(adaptRLSPPGXGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptRLSXGyroPulseRate = estimateAdaptRLSXGyroPulseRate * 60;
+adaptRLSXGyroError = sqrt(immse(estimateAdaptRLSXGyroPulseRate,realHR));
+disp(strcat('STFT(using RLS xGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptRLSXGyroError)));
+
+[adaptRLSPPGYGyroSpectrum,adaptRLSPPGYGyro]= GetSpectrumUsingRLSFilt(yGyro,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptRLSYGyroPulseRate]= getHRFromSpectrum(adaptRLSPPGYGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptRLSYGyroPulseRate = estimateAdaptRLSYGyroPulseRate * 60;
+adaptRLSYGyroError = sqrt(immse(estimateAdaptRLSYGyroPulseRate,realHR));
+disp(strcat('STFT(using RLS yGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptRLSYGyroError)));
+
+[adaptFFTPPGXAccSpectrum,adaptFFTPPGXAcc]= GetSpectrumUsingFFTFilt(xAcc,PPG,FFTLength,Overlap,Fs);
+[estimateFFTAdaptXAccPulseRate]= getHRFromSpectrum(adaptFFTPPGXAccSpectrum,freq,freqRange,RHR);
+estimateFFTAdaptXAccPulseRate = estimateFFTAdaptXAccPulseRate * 60;
+adaptFFTXAccError = sqrt(immse(estimateFFTAdaptXAccPulseRate,realHR));
+disp(strcat('STFT(using FFT xAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptFFTXAccError)));
+
+[adaptFFTPPGYAccSpectrum,adaptFFTPPGYAcc]= GetSpectrumUsingFFTFilt(yAcc,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptFFTYAccPulseRate]= getHRFromSpectrum(adaptFFTPPGYAccSpectrum,freq,freqRange,RHR);
+estimateAdaptFFTYAccPulseRate = estimateAdaptFFTYAccPulseRate * 60;
+adaptFFTYAccError = sqrt(immse(estimateAdaptFFTYAccPulseRate,realHR));
+disp(strcat('STFT(using FFT yAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptFFTYAccError)));
+
+[adaptFFTPPGZAccSpectrum,adaptFFTPPGZAcc]= GetSpectrumUsingFFTFilt(zAcc,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptFFTZAccPulseRate]= getHRFromSpectrum(adaptFFTPPGZAccSpectrum,freq,freqRange,RHR);
+estimateAdaptFFTZAccPulseRate = estimateAdaptFFTZAccPulseRate * 60;
+adaptFFTZAccError = sqrt(immse(estimateAdaptFFTZAccPulseRate,realHR));
+disp(strcat('STFT(using FFT zAcc Only)とpeakからのPRの平均二乗誤差:',num2str(adaptFFTZAccError)));
+
+[adaptFFTPPGXGyroSpectrum,adaptFFTPPGXGyro]= GetSpectrumUsingFFTFilt(xGyro,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptFFTXGyroPulseRate]= getHRFromSpectrum(adaptFFTPPGXGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptFFTXGyroPulseRate = estimateAdaptFFTXGyroPulseRate * 60;
+adaptFFTXGyroError = sqrt(immse(estimateAdaptFFTXGyroPulseRate,realHR));
+disp(strcat('STFT(using FFT xGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptFFTXGyroError)));
+
+[adaptFFTPPGYGyroSpectrum,adaptFFTPPGYGyro]= GetSpectrumUsingFFTFilt(yGyro,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptFFTYGyroPulseRate]= getHRFromSpectrum(adaptFFTPPGYGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptFFTYGyroPulseRate = estimateAdaptFFTYGyroPulseRate * 60;
+adaptFFTYGyroError = sqrt(immse(estimateAdaptFFTYGyroPulseRate,realHR));
+disp(strcat('STFT(using FFT yGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptFFTYGyroError)));
+
+[adaptFFTPPGZGyroSpectrum,adaptFFTPPGZGyro]= GetSpectrumUsingFFTFilt(zGyro,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptFFTZGyroPulseRate]= getHRFromSpectrum(adaptFFTPPGZGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptFFTZGyroPulseRate = estimateAdaptFFTZGyroPulseRate * 60;
+adaptFFTZGyroError = sqrt(immse(estimateAdaptFFTZGyroPulseRate,realHR));
+disp(strcat('STFT(using FFT zGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptFFTZGyroError)));
+
+[adaptRLSPPGZGyroSpectrum,adaptRLSPPGZGyro]= GetSpectrumUsingRLSFilt(zGyro,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptRLSZGyroPulseRate]= getHRFromSpectrum(adaptRLSPPGZGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptRLSZGyroPulseRate = estimateAdaptRLSZGyroPulseRate * 60;
+adaptRLSZGyroError = sqrt(immse(estimateAdaptRLSZGyroPulseRate,realHR));
+disp(strcat('STFT(using RLS zGyro Only)とpeakからのPRの平均二乗誤差:',num2str(adaptRLSZGyroError)));
