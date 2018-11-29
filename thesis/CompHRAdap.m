@@ -103,6 +103,44 @@ yGyro = trimSig(yGyro,Fs,procTime);
 zGyro = PPGData(:,7);
 zGyro = trimSig(zGyro,Fs,procTime);
 
+xAngleFromGyro = angleSpeedIntegral(xGyro,Fs);
+yAngleFromGyro = angleSpeedIntegral(yGyro,Fs);
+zAngleFromGyro = angleSpeedIntegral(zGyro,Fs);
+
+[xAngleFromAcc,yAngleFromAcc,zAngleFromAcc] = calcAngleFromAcc(xAcc,yAcc,zAcc);
+
+lowFreq = 3;
+inWindowNum = 50;
+
+windowTime = 1 / lowFreq * inWindowNum;
+windowPoint = ceil(windowTime / Ts);
+
+[Cxy,F] = mscohere(xAngleFromGyro,xAngleFromAcc,hann(windowPoint),...
+    ceil(windowPoint*0.8),windowPoint,Fs);
+figure;
+plot(F,Cxy);
+title('Magnitude-Squared Coherence');
+xlabel('Frequency (Hz)');
+grid;
+coheFreqRange = [0 3.0];
+xlim(coheFreqRange);
+xPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
+
+[Cxy,F] = mscohere(yAngleFromGyro,yAngleFromAcc,hann(windowPoint),...
+    ceil(windowPoint*0.8),windowPoint,Fs);
+yPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
+
+[Cxy,F] = mscohere(zAngleFromGyro,zAngleFromAcc,hann(windowPoint),...
+    ceil(windowPoint*0.8),windowPoint,Fs);
+figure;
+plot(F,Cxy);
+title('Magnitude-Squared Coherence');
+xlabel('Frequency (Hz)');
+grid;
+coheFreqRange = [0 3.0];
+xlim(coheFreqRange);
+zPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
+
 %dは観測信号, xは外乱, eを脈波として使用する
 [adaptLMSPPGXAccSpectrum,adaptLMSPPGXAcc]= GetSpectrumUsingLMSFilt(xAcc,PPG,FFTLength,Overlap,Fs);
 [estimateLMSAdaptXAccPulseRate]= getHRFromSpectrum(adaptLMSPPGXAccSpectrum,freq,freqRange,RHR);
@@ -292,4 +330,6 @@ mixedFFTGyroSpectrum(:,:,3) = adaptFFTPPGZGyroSpectrum;
 estimateAdaptFFTTriGyroPulseRate = estimateAdaptFFTTriGyroPulseRate * 60;
 estimateAdaptFFTTriGyroPulseError = sqrt(immse(estimateAdaptFFTTriGyroPulseRate,realHR));
 disp(strcat('STFT(using FFT Gyro all Axis)とpeakからのPRの平均二乗誤差:',num2str(estimateAdaptFFTTriGyroPulseError)));
+
+
 
