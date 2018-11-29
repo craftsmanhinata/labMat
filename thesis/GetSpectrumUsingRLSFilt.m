@@ -2,7 +2,7 @@ function [adaptOutputSpectrum,adaptOutput] = GetSpectrumUsingRLSFilt(inputX,desi
     Fs)
 %ESTIMATEHRUSINGRLSFILT この関数の概要をここに記述
 %   詳細説明をここに記述
-RLSFilterLength = 64;
+RLSFilterLength = 450;
 RLSFilter = dsp.RLSFilter('Length',RLSFilterLength,'ForgettingFactor',1);
 [~,adaptOutput] = RLSFilter(inputX,desiredSignal);
 [adaptOutputSpectrum,~,~] = spectrogram(adaptOutput,hann(FFTLength),Overlap,FFTLength,Fs); 

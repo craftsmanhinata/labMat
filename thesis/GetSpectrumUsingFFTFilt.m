@@ -2,7 +2,7 @@ function [adaptOutputSpectrum,adaptOutput] = GetSpectrumUsingFFTFilt(inputX,desi
     Fs)
 %ESTIMATEHRUSINGRLSFILT この関数の概要をここに記述
 %   詳細説明をここに記述
-FFTFilterLength = 300;
+FFTFilterLength = 450;
 FFTFilterBlockLength = 100;
 StepSize = 0.01;
 FFTFilter = dsp.FrequencyDomainAdaptiveFilter('Length',FFTFilterLength,'BlockLength',FFTFilterBlockLength,...
