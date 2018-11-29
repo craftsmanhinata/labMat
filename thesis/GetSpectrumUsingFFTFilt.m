@@ -1,11 +1,8 @@
 function [adaptOutputSpectrum,adaptOutput] = GetSpectrumUsingFFTFilt(inputX,desiredSignal,FFTLength,Overlap,...
-    Fs)
+    Fs,FFTFilterLength,StepSize)
 %ESTIMATEHRUSINGRLSFILT この関数の概要をここに記述
 %   詳細説明をここに記述
-FFTFilterLength = 450;
-FFTFilterBlockLength = 100;
-StepSize = 0.01;
-FFTFilter = dsp.FrequencyDomainAdaptiveFilter('Length',FFTFilterLength,'BlockLength',FFTFilterBlockLength,...
+FFTFilter = dsp.FrequencyDomainAdaptiveFilter('Length',FFTFilterLength,...
     'StepSize',StepSize);
 [~,adaptOutput] = FFTFilter(inputX,desiredSignal);
 [adaptOutputSpectrum,~,~] = spectrogram(adaptOutput,hann(FFTLength),Overlap,FFTLength,Fs); 
