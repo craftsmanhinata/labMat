@@ -132,14 +132,36 @@ yPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
 
 [Cxy,F] = mscohere(zAngleFromGyro,zAngleFromAcc,hann(windowPoint),...
     ceil(windowPoint*0.8),windowPoint,Fs);
-figure;
-plot(F,Cxy);
-title('Magnitude-Squared Coherence');
-xlabel('Frequency (Hz)');
-grid;
-coheFreqRange = [0 3.0];
-xlim(coheFreqRange);
 zPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
+
+filterOrder = 2900;
+
+highXPass = fir1(filterOrder,xPeakFreq/(Fs/2),'high');
+lowXPass = fir1(filterOrder,xPeakFreq/(Fs/2),'low');
+
+highYPass = fir1(filterOrder,yPeakFreq/(Fs/2),'high');
+lowYPass = fir1(filterOrder,yPeakFreq/(Fs/2),'low');
+
+highZPass = fir1(filterOrder,zPeakFreq/(Fs/2),'high');
+lowZPass = fir1(filterOrder,zPeakFreq/(Fs/2),'low');
+
+FilteredXAngleFromAcc  = filtfilt(lowXPass,1,xAngleFromAcc);
+FilteredXAngleFromGyro = filtfilt(highXPass,1,xAngleFromGyro);
+FilteredYAngleFromAcc  = filtfilt(lowYPass,1,yAngleFromAcc);
+FilteredYAngleFromGyro = filtfilt(highYPass,1,yAngleFromGyro);
+FilteredZAngleFromAcc  = filtfilt(lowZPass,1,zAngleFromAcc);
+FilteredZAngleFromGyro = filtfilt(highZPass,1,zAngleFromGyro);
+
+XAngle = FilteredXAngleFromAcc + FilteredXAngleFromGyro';
+YAngle = FilteredYAngleFromAcc + FilteredYAngleFromGyro';
+ZAngle = FilteredZAngleFromAcc + FilteredZAngleFromGyro';
+figure();
+plot(dECGTime,rad2deg(XAngle));
+hold on;
+plot(dECGTime,rad2deg(YAngle));
+plot(dECGTime,rad2deg(ZAngle));
+legend('XAngle','YAngle','ZAngle');
+
 
 %dは観測信号, xは外乱, eを脈波として使用する
 [adaptLMSPPGXAccSpectrum,adaptLMSPPGXAcc]= GetSpectrumUsingLMSFilt(xAcc,PPG,FFTLength,Overlap,Fs);
