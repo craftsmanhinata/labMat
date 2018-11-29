@@ -126,6 +126,17 @@ estimateAdaptLMSZAccPulseRate = estimateAdaptLMSZAccPulseRate * 60;
 adaptLMSZAccError = sqrt(immse(estimateAdaptLMSZAccPulseRate,realHR));
 disp(strcat('STFT(using NLMS zAcc Only)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(adaptLMSZAccError)));
 
+mixedNLMSAccSpectrum = zeros([size(adaptLMSPPGXAccSpectrum) 3]);
+mixedNLMSAccSpectrum(:,:,1) = adaptLMSPPGXAccSpectrum;
+mixedNLMSAccSpectrum(:,:,2) = adaptLMSPPGYAccSpectrum;
+mixedNLMSAccSpectrum(:,:,3) = adaptLMSPPGZAccSpectrum;
+
+[estimateAdaptNLMSTriAccPulseRate]= getHRFromMixedSpectrums(mixedNLMSAccSpectrum,freq,freqRange,RHR);
+estimateAdaptNLMSTriAccPulseRate = estimateAdaptNLMSTriAccPulseRate * 60;
+estimateAdaptNLMSTriAccPulseError = sqrt(immse(estimateAdaptNLMSTriAccPulseRate,realHR));
+disp(strcat('STFT(using NLMS Acc all Axis)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(estimateAdaptNLMSTriAccPulseError)));
+
+
 [adaptLMSPPGXGyroSpectrum,adaptLMSPPGXGyro]= GetSpectrumUsingLMSFilt(xGyro,PPG,FFTLength,Overlap,Fs);
 [estimateAdaptLMSXGyroPulseRate]= getHRFromSpectrum(adaptLMSPPGXGyroSpectrum,freq,freqRange,RHR);
 estimateAdaptLMSXGyroPulseRate = estimateAdaptLMSXGyroPulseRate * 60;
@@ -143,6 +154,18 @@ disp(strcat('STFT(using NLMS yGyro Only)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(a
 estimateAdaptLMSZGyroPulseRate = estimateAdaptLMSZGyroPulseRate * 60;
 adaptLMSZGyroError = sqrt(immse(estimateAdaptLMSZGyroPulseRate,realHR));
 disp(strcat('STFT(using NLMS zGyro Only)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(adaptLMSZGyroError)));
+
+mixedNLMSGyroSpectrum = zeros([size(adaptLMSPPGXGyroSpectrum) 3]);
+mixedNLMSGyroSpectrum(:,:,1) = adaptLMSPPGXGyroSpectrum;
+mixedNLMSGyroSpectrum(:,:,2) = adaptLMSPPGYGyroSpectrum;
+mixedNLMSGyroSpectrum(:,:,3) = adaptLMSPPGZGyroSpectrum;
+
+[estimateAdaptNLMSTriGyroPulseRate]= getHRFromMixedSpectrums(mixedNLMSGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptNLMSTriGyroPulseRate = estimateAdaptNLMSTriGyroPulseRate * 60;
+estimateAdaptNLMSTriGyroPulseError = sqrt(immse(estimateAdaptNLMSTriGyroPulseRate,realHR));
+disp(strcat('STFT(using NLMS Gyro all Axis)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(estimateAdaptNLMSTriGyroPulseError)));
+
+
 
 [adaptRLSPPGXAccSpectrum,adaptRLSPPGXAcc]= GetSpectrumUsingRLSFilt(xAcc,PPG,FFTLength,Overlap,Fs);
 [estimateRLSAdaptXAccPulseRate]= getHRFromSpectrum(adaptRLSPPGXAccSpectrum,freq,freqRange,RHR);
@@ -162,6 +185,20 @@ estimateAdaptRLSZAccPulseRate = estimateAdaptRLSZAccPulseRate * 60;
 adaptRLSZAccError = sqrt(immse(estimateAdaptRLSZAccPulseRate,realHR));
 disp(strcat('STFT(using RLS zAcc Only)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(adaptRLSZAccError)));
 
+
+mixedRLSAccSpectrum = zeros([size(adaptRLSPPGXAccSpectrum) 3]);
+mixedRLSAccSpectrum(:,:,1) = adaptRLSPPGXAccSpectrum;
+mixedRLSAccSpectrum(:,:,2) = adaptRLSPPGYAccSpectrum;
+mixedRLSAccSpectrum(:,:,3) = adaptRLSPPGZAccSpectrum;
+
+[estimateAdaptRLSTriAccPulseRate]= getHRFromMixedSpectrums(mixedRLSAccSpectrum,freq,freqRange,RHR);
+estimateAdaptRLSTriAccPulseRate = estimateAdaptRLSTriAccPulseRate * 60;
+estimateAdaptRLSTriAccPulseError = sqrt(immse(estimateAdaptRLSTriAccPulseRate,realHR));
+disp(strcat('STFT(using RLS Acc all Axis)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(estimateAdaptRLSTriAccPulseError)));
+
+
+
+
 [adaptRLSPPGXGyroSpectrum,adaptRLSPPGXGyro]= GetSpectrumUsingRLSFilt(xGyro,PPG,FFTLength,Overlap,Fs);
 [estimateAdaptRLSXGyroPulseRate]= getHRFromSpectrum(adaptRLSPPGXGyroSpectrum,freq,freqRange,RHR);
 estimateAdaptRLSXGyroPulseRate = estimateAdaptRLSXGyroPulseRate * 60;
@@ -173,6 +210,25 @@ disp(strcat('STFT(using RLS xGyro Only)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(ad
 estimateAdaptRLSYGyroPulseRate = estimateAdaptRLSYGyroPulseRate * 60;
 adaptRLSYGyroError = sqrt(immse(estimateAdaptRLSYGyroPulseRate,realHR));
 disp(strcat('STFT(using RLS yGyro Only)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(adaptRLSYGyroError)));
+
+[adaptRLSPPGZGyroSpectrum,adaptRLSPPGZGyro]= GetSpectrumUsingRLSFilt(zGyro,PPG,FFTLength,Overlap,Fs);
+[estimateAdaptRLSZGyroPulseRate]= getHRFromSpectrum(adaptRLSPPGZGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptRLSZGyroPulseRate = estimateAdaptRLSZGyroPulseRate * 60;
+adaptRLSZGyroError = sqrt(immse(estimateAdaptRLSZGyroPulseRate,realHR));
+disp(strcat('STFT(using RLS zGyro Only)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(adaptRLSZGyroError)));
+
+
+mixedRLSGyroSpectrum = zeros([size(adaptRLSPPGXGyroSpectrum) 3]);
+mixedRLSGyroSpectrum(:,:,1) = adaptRLSPPGXGyroSpectrum;
+mixedRLSGyroSpectrum(:,:,2) = adaptRLSPPGYGyroSpectrum;
+mixedRLSGyroSpectrum(:,:,3) = adaptRLSPPGZGyroSpectrum;
+
+[estimateAdaptRLSTriGyroPulseRate]= getHRFromMixedSpectrums(mixedRLSGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptRLSTriGyroPulseRate = estimateAdaptRLSTriGyroPulseRate * 60;
+estimateAdaptRLSTriGyroPulseError = sqrt(immse(estimateAdaptRLSTriGyroPulseRate,realHR));
+disp(strcat('STFT(using RLS Gyro all Axis)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(estimateAdaptRLSTriGyroPulseError)));
+
+
 
 [adaptFFTPPGXAccSpectrum,adaptFFTPPGXAcc]= GetSpectrumUsingFFTFilt(xAcc,PPG,FFTLength,Overlap,Fs);
 [estimateFFTAdaptXAccPulseRate]= getHRFromSpectrum(adaptFFTPPGXAccSpectrum,freq,freqRange,RHR);
@@ -192,6 +248,22 @@ estimateAdaptFFTZAccPulseRate = estimateAdaptFFTZAccPulseRate * 60;
 adaptFFTZAccError = sqrt(immse(estimateAdaptFFTZAccPulseRate,realHR));
 disp(strcat('STFT(using FFT zAcc Only)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(adaptFFTZAccError)));
 
+
+mixedFFTAccSpectrum = zeros([size(adaptFFTPPGXAccSpectrum) 3]);
+mixedFFTAccSpectrum(:,:,1) = adaptFFTPPGXAccSpectrum;
+mixedFFTAccSpectrum(:,:,2) = adaptFFTPPGYAccSpectrum;
+mixedFFTAccSpectrum(:,:,3) = adaptFFTPPGZAccSpectrum;
+
+[estimateAdaptFFTTriAccPulseRate]= getHRFromMixedSpectrums(mixedFFTAccSpectrum,freq,freqRange,RHR);
+estimateAdaptFFTTriAccPulseRate = estimateAdaptFFTTriAccPulseRate * 60;
+estimateAdaptFFTTriAccPulseError = sqrt(immse(estimateAdaptFFTTriAccPulseRate,realHR));
+disp(strcat('STFT(using FFT Acc all Axis)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(estimateAdaptFFTTriAccPulseError)));
+
+
+
+
+
+
 [adaptFFTPPGXGyroSpectrum,adaptFFTPPGXGyro]= GetSpectrumUsingFFTFilt(xGyro,PPG,FFTLength,Overlap,Fs);
 [estimateAdaptFFTXGyroPulseRate]= getHRFromSpectrum(adaptFFTPPGXGyroSpectrum,freq,freqRange,RHR);
 estimateAdaptFFTXGyroPulseRate = estimateAdaptFFTXGyroPulseRate * 60;
@@ -210,8 +282,14 @@ estimateAdaptFFTZGyroPulseRate = estimateAdaptFFTZGyroPulseRate * 60;
 adaptFFTZGyroError = sqrt(immse(estimateAdaptFFTZGyroPulseRate,realHR));
 disp(strcat('STFT(using FFT zGyro Only)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(adaptFFTZGyroError)));
 
-[adaptRLSPPGZGyroSpectrum,adaptRLSPPGZGyro]= GetSpectrumUsingRLSFilt(zGyro,PPG,FFTLength,Overlap,Fs);
-[estimateAdaptRLSZGyroPulseRate]= getHRFromSpectrum(adaptRLSPPGZGyroSpectrum,freq,freqRange,RHR);
-estimateAdaptRLSZGyroPulseRate = estimateAdaptRLSZGyroPulseRate * 60;
-adaptRLSZGyroError = sqrt(immse(estimateAdaptRLSZGyroPulseRate,realHR));
-disp(strcat('STFT(using RLS zGyro Only)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(adaptRLSZGyroError)));
+
+mixedFFTGyroSpectrum = zeros([size(adaptFFTPPGXGyroSpectrum) 3]);
+mixedFFTGyroSpectrum(:,:,1) = adaptFFTPPGXGyroSpectrum;
+mixedFFTGyroSpectrum(:,:,2) = adaptFFTPPGYGyroSpectrum;
+mixedFFTGyroSpectrum(:,:,3) = adaptFFTPPGZGyroSpectrum;
+
+[estimateAdaptFFTTriGyroPulseRate]= getHRFromMixedSpectrums(mixedFFTGyroSpectrum,freq,freqRange,RHR);
+estimateAdaptFFTTriGyroPulseRate = estimateAdaptFFTTriGyroPulseRate * 60;
+estimateAdaptFFTTriGyroPulseError = sqrt(immse(estimateAdaptFFTTriGyroPulseRate,realHR));
+disp(strcat('STFT(using FFT Gyro all Axis)Ç∆peakÇ©ÇÁÇÃPRÇÃïΩãœìÒèÊåÎç∑:',num2str(estimateAdaptFFTTriGyroPulseError)));
+
