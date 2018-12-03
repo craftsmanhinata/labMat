@@ -30,3 +30,23 @@ plotIs = false;
 
 slidingSpectrumTime = spectrumTimeSlidingEndTime(ECGSpectrumTime);
 realHR = calcRealHR(dECGTime,dECG,slidingSpectrumTime,peakHeight,peakDistance,plotIs);
+transitionHR = diff(realHR);
+
+figure();
+histogram(transitionHR);
+pd = fitdist(transitionHR,'Normal');
+ci = paramci(pd);
+ciXMin = ci(1,1);
+ciXMax = ci(2,1);
+xMin = min(transitionHR)*1.5;
+xMax = max(transitionHR)*1.5;
+xVal = xMin:0.1:xMax;
+cdf = cdf(pd,xVal);
+plot(xVal,cdf);
+figure();
+y = pdf(pd,xVal);
+plot(xVal,y);
+axes = gca;
+yAxes = axes.YLim;
+yMax = max(yAxes);
+rectangle('Position',[ciXMin 0 ciXMax-ciXMin yMax]);

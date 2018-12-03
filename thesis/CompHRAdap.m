@@ -50,7 +50,7 @@ FFTLength = 512;
 Overlap = 256;
 peakHeight = 0.03;
 peakDistance = 0.3;
-plotIs = false;
+plotIs = true;
 
 [ECGSpectrum,freq,ECGSpectrumTime] = spectrogram(dECG,hann(FFTLength),Overlap,FFTLength,Fs); 
 ECGSpectrum = convertOneSidedSpectrum(ECGSpectrum,FFTLength);
@@ -60,12 +60,13 @@ estimateHeartRate = estimateHeartRate * 60;
 
 HRFig = figure();
 plot(ECGSpectrumTime,estimateHeartRate);
-slidingSpectrumTime = spectrumTimeSlidingEndTime(ECGSpectrumTime);
+slidingSpectrumTime = spectrumTimeSlidingEndTime(ECGSpectrumTime,Ts);
+
 realHR = calcRealHR(dECGTime,dECG,slidingSpectrumTime,peakHeight,peakDistance,plotIs);
 
+figure(HRFig);
 hold on;
 
-% plot(spectrumTime,realHR);
 plot(slidingSpectrumTime,realHR);
 HRError = sqrt(immse(estimateHeartRate,realHR));
 disp(strcat('STFTÇ∆peakÇ©ÇÁÇÃHRÇÃïΩãœìÒèÊåÎç∑:',num2str(HRError)));

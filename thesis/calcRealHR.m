@@ -1,12 +1,12 @@
-function [realHR] = calcRealHR(ECGTime,ECG,ProcTime,peakHeight,peakDistance,plot)
+function [realHR] = calcRealHR(ECGTime,ECG,ProcTime,peakHeight,peakDistance,plotIs)
 %CALCREALHR この関数の概要をここに記述
 %   詳細説明をここに記述
-
 procNum = length(ProcTime);
 realHR = ones(procNum,1);
 startTime = 0;
-if plot
+if plotIs
     figure();
+    xlabel('Time(sec)');
 end
 for index = 1: procNum
     endTime = ProcTime(index);
@@ -15,14 +15,16 @@ for index = 1: procNum
     procIndex = intersect(find((ECGTime >= startTime)),find(ECGTime <= endTime));
     procECG = ECG(procIndex);
     procECGTime = ECGTime(procIndex);
-    if plot
+    if plotIs
         plot(procECGTime,procECG);
     end
     [ECGPks,ECGPksTime] = findpeaks(procECG,procECGTime,'MinPeakHeight',peakHeight,'MinPeakDistance',peakDistance);
-    if plot
+    if plotIs
         hold on;
         plot(ECGPksTime,ECGPks,'ko');
         hold off;
+        drawnow;
+        pause(0.3);
     end
     startTime = endTime;
     realHR(index) = length(ECGPks) * HRCoef;
