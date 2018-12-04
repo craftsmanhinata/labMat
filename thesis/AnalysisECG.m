@@ -28,7 +28,7 @@ plotIs = false;
 [ECGSpectrum,freq,ECGSpectrumTime] = spectrogram(dECG,hann(FFTLength),Overlap,FFTLength,Fs); 
 
 
-slidingSpectrumTime = spectrumTimeSlidingEndTime(ECGSpectrumTime);
+slidingSpectrumTime = spectrumTimeSlidingEndTime(ECGSpectrumTime,Ts);
 realHR = calcRealHR(dECGTime,dECG,slidingSpectrumTime,peakHeight,peakDistance,plotIs);
 transitionHR = diff(realHR);
 
@@ -49,4 +49,6 @@ plot(xVal,y);
 axes = gca;
 yAxes = axes.YLim;
 yMax = max(yAxes);
-rectangle('Position',[ciXMin 0 ciXMax-ciXMin yMax]);
+% rectangle('Position',[ciXMin 0 ciXMax-ciXMin yMax]);
+xlabel('Time(sec.)');
+ylabel('Probability');
