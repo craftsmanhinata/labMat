@@ -89,7 +89,7 @@ end
 PPGFolder = 'PPG\';
 
 searchFilterCoefLength = 10:10:500;
-searachFilterCoefLengthProcNum = length(searchFilterCoefLength);
+searchFilterCoefLengthProcNum = length(searchFilterCoefLength);
 
 NLMSMinStepSize = 0.001;
 
@@ -196,24 +196,63 @@ for index = 1 : trialLength
 end
 
 NLMSStepProcNum = 50;
-RMSEArray = zeros(Dict.Count,Dict.Count-1,searachFilterCoefLengthProcNum,NLMSStepProcNum);
+RMSEArray = zeros(trialLength,trialLength-1,searchFilterCoefLengthProcNum,NLMSStepProcNum,Dict.Count);
 
 % diary on;
 for trialIndex = 1 : trialLength
     otherDataIndex = 1:1:trialLength;
     otherDataIndex(trialIndex) = '';
     for index = 1 : trialLength - 1
-        for filteCoeffIndex = 1:searachFilterCoefLengthProcNum
-            NLMStepSizeArray = zeros(NLMSStepProcNum,1);
-            NLMStepSizeArray(1) = NLMSMinStepSize;
+        for filteCoeffIndex = 1:searchFilterCoefLengthProcNum
+            NLMSStepSizeArray = zeros(NLMSStepProcNum,1);
+            NLMSStepSizeArray(1) = NLMSMinStepSize;
             for NLMSStepSizeIndex = 1:NLMSStepProcNum
                 NLMSFilter = dsp.LMSFilter('Length',searchFilterCoefLength(filteCoeffIndex),...
                     'StepSize',NLMSStepSizeArray(NLMSStepSizeIndex),'Method','Normalized LMS');
                 if NLMSStepSizeIndex == 1
-                    maxstep(NLMSFilter,x);
+                    NLMSMaxStepSize = maxstep(NLMSFilter,PPGDataArray(:,otherDataIndex(index)));
+                    NLMSStepSizeArray = logspace(log10(NLMSMinStepSize),log10(NLMSMaxStepSize),NLMSStepProcNum);
                 end
                 disp(strcat('FilterOrder:',num2str(searchFilterCoefLength(filteCoeffIndex))));
-                disp(strcat('NLMS StepSize',num2str(NLMSStepSize)));
+                disp(strcat('NLMS StepSize:',num2str(NLMSStepSizeArray(NLMSStepSizeIndex))));
+                spectrumBuffer = zeros(ceil(FFTLength/2)+1,FFTExecuteNum,zAngleKey);
+                for axisIndex = 1:Dict.Count
+                    disp(strcat('axisName:',Dict(axisIndex)));
+                    if axisIndex < TriAccKey
+                        [~,adaptOutput] = NLMSFilter(PPGDataArray(:,otherDataIndex(index)),...
+                            inertialDataArray(axisIndex,:,otherDataIndex(index))');
+                        [adaptOutputSpectrum,freq,spectrumTime] = spectrogram(adaptOutput,hann(FFTLength),Overlap,FFTLength,Fs);
+                        adaptOutputSpectrum = convertOneSidedSpectrum(adaptOutputSpectrum,FFTLength);
+                        spectrumBuffer(:,:,axisIndex) = adaptOutputSpectrum;
+                        [estimateAdaptPulseRate]= getHRFromSpectrum(adaptOutputSpectrum,freq,freqRange,RHR);
+                        estimateAdaptPulseRate = estimateAdaptPulseRate * 60;
+                        adaptPulseRateError = sqrt(immse(estimateAdaptPulseRate,realHRArray(:,otherDataIndex(index))));
+                        disp(strcat('RMSE:',num2str(adaptPulseRateError)));
+                        RMSEArray(trialIndex,index,filteCoeffIndex,NLMSStepSizeIndex,axisIndex) = adaptPulseRateError;
+                        NLMSFilter = dsp.LMSFilter('Length',searchFilterCoefLength(filteCoeffIndex),...
+                        'StepSize',NLMSStepSizeArray(NLMSStepSizeIndex),'Method','Normalized LMS');
+                    else
+                        mixedNLMSSpectrum = zeros([size(adaptOutputSpectrum) 3]);
+                        switch axisIndex
+                            case TriAccKey
+                                firstIndex = xAccKey;
+                            case TriGyroKey
+                                firstIndex = xGyroKey;
+                            case TriAngleKey
+                                firstIndex = xAngleKey;
+                        end
+                        loopCount = 1;
+                        for mixedIndex = firstIndex:firstIndex+2
+                            mixedNLMSSpectrum(:,:,loopCount) = spectrumBuffer(:,:,mixedIndex);
+                            loopCount = loopCount + 1;
+                        end
+                        [estimateAdaptTriPulseRate]= getHRFromMixedSpectrums(mixedNLMSSpectrum,freq,freqRange,RHR);
+                        estimateAdaptTriPulseRate = estimateAdaptTriPulseRate * 60;
+                        estimateAdaptTriPulseError = sqrt(immse(estimateAdaptTriPulseRate,realHRArray(:,otherDataIndex(index))));
+                        RMSEArray(trialIndex,index,filteCoeffIndex,NLMSStepSizeIndex,axisIndex) = estimateAdaptTriPulseError;
+                        disp(strcat('RMSE:',num2str(estimateAdaptTriPulseError)));
+                    end
+                end
             end
         end
     end
