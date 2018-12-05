@@ -2,7 +2,7 @@
 clc;
 clear;
 srcFolderName = '.\ECGRawData\';
-fileName = '20181201longtime';
+fileName = 'ECG20181204_16';
 extension = '.emt';
 outputExtension = '.csv';
 data = dlmread(strcat(srcFolderName,fileName,extension),'\t',11,1);
