@@ -197,19 +197,16 @@ end
 NLMSStepProcNum = 20;
 NLMSRMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,Dict.Count);
 
+NLMSMaxStepSize = 2;%maxstep(NLMSFilter,PPGDataArray(:,trialIndex));
+NLMSStepSizeArray = logspace(log10(NLMSMinStepSize),log10(NLMSMaxStepSize),NLMSStepProcNum);
+
 % diary on;
 for trialIndex = 1 : trialLength
     disp(strcat(num2str(trialIndex),'å¬ñ⁄ÇÃÉfÅ[É^'));
     for filteCoeffIndex = 1:searchFilterCoefLengthProcNum
-        NLMSStepSizeArray = zeros(NLMSStepProcNum,1);
-        NLMSStepSizeArray(1) = NLMSMinStepSize;
         for NLMSStepSizeIndex = 1:NLMSStepProcNum
             NLMSFilter = dsp.LMSFilter('Length',searchFilterCoefLength(filteCoeffIndex),...
                 'StepSize',NLMSStepSizeArray(NLMSStepSizeIndex),'Method','Normalized LMS');
-            if NLMSStepSizeIndex == 1
-                NLMSMaxStepSize = 2;%maxstep(NLMSFilter,PPGDataArray(:,trialIndex));
-                NLMSStepSizeArray = logspace(log10(NLMSMinStepSize),log10(NLMSMaxStepSize),NLMSStepProcNum);
-            end
             disp(strcat('FilterOrder:',num2str(searchFilterCoefLength(filteCoeffIndex))));
             disp(strcat('NLMS StepSize:',num2str(NLMSStepSizeArray(NLMSStepSizeIndex))));
             spectrumBuffer = zeros(ceil(FFTLength/2)+1,FFTExecuteNum,zAngleKey);
@@ -218,6 +215,10 @@ for trialIndex = 1 : trialLength
                 if axisIndex < TriAccKey
                     [~,adaptOutput] = NLMSFilter(PPGDataArray(:,trialIndex),...
                         inertialDataArray(axisIndex,:,trialIndex)');
+                    if any(isnan(adaptOutput))
+                        disp('error');
+                        return
+                    end
                     [adaptOutputSpectrum,freq,spectrumTime] = spectrogram(adaptOutput,hann(FFTLength),Overlap,FFTLength,Fs);
                     adaptOutputSpectrum = convertOneSidedSpectrum(adaptOutputSpectrum,FFTLength);
                     spectrumBuffer(:,:,axisIndex) = adaptOutputSpectrum;

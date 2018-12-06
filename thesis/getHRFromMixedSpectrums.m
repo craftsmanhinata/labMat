@@ -17,8 +17,12 @@ for index = 1:size(spectrums,2)
     %     plot(procFreq,procSpectrum(:,index));
         [pks,locs] = findpeaks(procSpectrum(:,index,spectrumIndex),procFreq,'SortStr','descend'...
             ,'NPeaks',5);
-        estimateHeartRateIndex = knnsearch(locs,searchFreq);
-        candEstimateHeartRate(index,spectrumIndex) = locs(estimateHeartRateIndex);
+        if isempty(pks)
+            candEstimateHeartRate(index,spectrumIndex) = 3 * 60;
+        else
+            estimateHeartRateIndex = knnsearch(locs,searchFreq);
+            candEstimateHeartRate(index,spectrumIndex) = locs(estimateHeartRateIndex);
+        end
     end
     estimateHeartRateIndex = knnsearch(candEstimateHeartRate(index,:)',searchFreq);
     estimateHeartRate(index) = candEstimateHeartRate(index,estimateHeartRateIndex);

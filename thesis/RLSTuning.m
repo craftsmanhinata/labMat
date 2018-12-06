@@ -93,7 +93,7 @@ searchFilterCoefLength = 10:10:100;
 
 searchFilterCoefLengthProcNum = length(searchFilterCoefLength);
 
-NLMSMinStepSize = 0.001;
+RLSMinForgettingFactor = 0.6;
 
 xAccKey = 1;
 yAccKey = 2;
@@ -194,30 +194,31 @@ for index = 1 : trialLength
 end
 
 %NLMSStepProcNum = 50;
-NLMSStepProcNum = 20;
-NLMSRMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,Dict.Count);
+RLSStepProcNum = 20;
+RLSRMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,RLSStepProcNum,Dict.Count);
+
+RLSForgettingFactorArray = logspace(log10(RLSMinForgettingFactor),log10(1),RLSStepProcNum);
+
 
 % diary on;
 for trialIndex = 1 : trialLength
     disp(strcat(num2str(trialIndex),'個目のデータ'));
     for filteCoeffIndex = 1:searchFilterCoefLengthProcNum
-        NLMSStepSizeArray = zeros(NLMSStepProcNum,1);
-        NLMSStepSizeArray(1) = NLMSMinStepSize;
-        for NLMSStepSizeIndex = 1:NLMSStepProcNum
-            NLMSFilter = dsp.LMSFilter('Length',searchFilterCoefLength(filteCoeffIndex),...
-                'StepSize',NLMSStepSizeArray(NLMSStepSizeIndex),'Method','Normalized LMS');
-            if NLMSStepSizeIndex == 1
-                NLMSMaxStepSize = 2;%maxstep(NLMSFilter,PPGDataArray(:,trialIndex));
-                NLMSStepSizeArray = logspace(log10(NLMSMinStepSize),log10(NLMSMaxStepSize),NLMSStepProcNum);
-            end
+        for RLSForgettingFactorIndex = 1:RLSStepProcNum
+            RLSFilter = dsp.RLSFilter('Length',searchFilterCoefLength(filteCoeffIndex),...
+                'ForgettingFactor',RLSForgettingFactorArray(RLSForgettingFactorIndex));
             disp(strcat('FilterOrder:',num2str(searchFilterCoefLength(filteCoeffIndex))));
-            disp(strcat('NLMS StepSize:',num2str(NLMSStepSizeArray(NLMSStepSizeIndex))));
+            disp(strcat('RLS Forgetting Factor:',num2str(RLSForgettingFactorArray(RLSForgettingFactorIndex))));
             spectrumBuffer = zeros(ceil(FFTLength/2)+1,FFTExecuteNum,zAngleKey);
             for axisIndex = 1:Dict.Count
                 disp(strcat('axisName:',Dict(axisIndex)));
                 if axisIndex < TriAccKey
-                    [~,adaptOutput] = NLMSFilter(PPGDataArray(:,trialIndex),...
+                    [~,adaptOutput] = RLSFilter(PPGDataArray(:,trialIndex),...
                         inertialDataArray(axisIndex,:,trialIndex)');
+                    if any(isnan(adaptOutput))
+                        disp('error');
+                        return
+                    end
                     [adaptOutputSpectrum,freq,spectrumTime] = spectrogram(adaptOutput,hann(FFTLength),Overlap,FFTLength,Fs);
                     adaptOutputSpectrum = convertOneSidedSpectrum(adaptOutputSpectrum,FFTLength);
                     spectrumBuffer(:,:,axisIndex) = adaptOutputSpectrum;
@@ -225,11 +226,11 @@ for trialIndex = 1 : trialLength
                     estimateAdaptPulseRate = estimateAdaptPulseRate * 60;
                     adaptPulseRateError = sqrt(immse(estimateAdaptPulseRate,realHRArray(:,trialIndex)));
                     disp(strcat('RMSE:',num2str(adaptPulseRateError)));
-                    NLMSRMSEArray(trialIndex,filteCoeffIndex,NLMSStepSizeIndex,axisIndex) = adaptPulseRateError;
-                    NLMSFilter = dsp.LMSFilter('Length',searchFilterCoefLength(filteCoeffIndex),...
-                    'StepSize',NLMSStepSizeArray(NLMSStepSizeIndex),'Method','Normalized LMS');
+                    RLSRMSEArray(trialIndex,filteCoeffIndex,RLSForgettingFactorIndex,axisIndex) = adaptPulseRateError;
+                    RLSFilter = dsp.RLSFilter('Length',searchFilterCoefLength(filteCoeffIndex),...
+                    'ForgettingFactor',RLSForgettingFactorArray(RLSForgettingFactorIndex));
                 else
-                    mixedNLMSSpectrum = zeros([size(adaptOutputSpectrum) 3]);
+                    mixedRLSSpectrum = zeros([size(adaptOutputSpectrum) 3]);
                     switch axisIndex
                         case TriAccKey
                             firstIndex = xAccKey;
@@ -240,13 +241,13 @@ for trialIndex = 1 : trialLength
                     end
                     loopCount = 1;
                     for mixedIndex = firstIndex:firstIndex+2
-                        mixedNLMSSpectrum(:,:,loopCount) = spectrumBuffer(:,:,mixedIndex);
+                        mixedRLSSpectrum(:,:,loopCount) = spectrumBuffer(:,:,mixedIndex);
                         loopCount = loopCount + 1;
                     end
-                    [estimateAdaptTriPulseRate]= getHRFromMixedSpectrums(mixedNLMSSpectrum,freq,freqRange,RHR);
+                    [estimateAdaptTriPulseRate]= getHRFromMixedSpectrums(mixedRLSSpectrum,freq,freqRange,RHR);
                     estimateAdaptTriPulseRate = estimateAdaptTriPulseRate * 60;
                     estimateAdaptTriPulseError = sqrt(immse(estimateAdaptTriPulseRate,realHRArray(:,trialIndex)));
-                    NLMSRMSEArray(trialIndex,filteCoeffIndex,NLMSStepSizeIndex,axisIndex) = estimateAdaptTriPulseError;
+                    RLSRMSEArray(trialIndex,filteCoeffIndex,RLSForgettingFactorIndex,axisIndex) = estimateAdaptTriPulseError;
                     disp(strcat('RMSE:',num2str(estimateAdaptTriPulseError)));
                 end
             end
@@ -258,22 +259,22 @@ end
 
 % RMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,Dict.Count);
 evalAxis = [TriAccKey TriGyroKey TriAngleKey];
-NLMSRMSEMean = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,length(evalAxis));
-disp('NLMSアルゴリズムによる評価結果');
+RLSRMSEMean = zeros(trialLength,searchFilterCoefLengthProcNum,RLSStepProcNum,length(evalAxis));
+disp('RLSアルゴリズムによる評価結果');
 for trialIndex = 1 : trialLength
     otherDataIndex = 1:1:trialLength;
     otherDataIndex(trialIndex) = '';
-    NLMSRMSEMean(trialIndex,:,:,:) = mean(NLMSRMSEArray(otherDataIndex,:,:,...
+    RLSRMSEMean(trialIndex,:,:,:) = mean(RLSRMSEArray(otherDataIndex,:,:,...
         evalAxis));
     %各軸について最小を評価
     for axisIndex = 1 : length(evalAxis)
-        curRMSEMean = reshape(NLMSRMSEMean(trialIndex,:,:,axisIndex),...
-        [searchFilterCoefLengthProcNum NLMSStepProcNum]);
+        curRMSEMean = reshape(RLSRMSEMean(trialIndex,:,:,axisIndex),...
+        [searchFilterCoefLengthProcNum RLSStepProcNum]);
         [val,minFilterParamKey] = min(curRMSEMean(:));
         [coefLenInd,StepInd]= ind2sub(size(curRMSEMean),minFilterParamKey);
         disp(strcat(num2str(trialIndex),'個目のデータの',Dict(evalAxis(axisIndex)),'に対する最適パラメータ:','係数長:',num2str(searchFilterCoefLength(coefLenInd)),...
-        'ステップサイズ:',num2str(NLMSStepSizeArray(StepInd)),''));
-        disp(strcat(num2str(trialIndex),'個目のデータのRMSE:',num2str(NLMSRMSEArray(trialLength,coefLenInd,StepInd,evalAxis(axisIndex)))));
+        'ステップサイズ:',num2str(RLSForgettingFactorArray(StepInd)),''));
+        disp(strcat(num2str(trialIndex),'個目のデータのRMSE:',num2str(RLSRMSEArray(trialLength,coefLenInd,StepInd,evalAxis(axisIndex)))));
     end
 end
 
