@@ -24,8 +24,8 @@ disp(strcat('FFTステップサイズ:',num2str(FFTStepSize)));
 
 
 ECGFolder = 'ECG\';
-fileNameECG = '2018112405move02.csv';
-fileNamePPG = '20181124_200643_Move02.csv';
+fileNameECG = 'ECG20181204_04.csv';
+fileNamePPG = '20181204_Data04_Res.csv';
 ECGData = csvread(strcat(ECGFolder,fileNameECG));
 ECG = ECGData(:,2);
 
@@ -48,8 +48,8 @@ title('ECG');
 
 FFTLength = 512;
 Overlap = 256;
-peakHeight = 0.03;
-peakDistance = 0.3;
+peakHeight = 30;
+peakDistance = 0.4;
 plotIs = true;
 
 [ECGSpectrum,freq,ECGSpectrumTime] = spectrogram(dECG,hann(FFTLength),Overlap,FFTLength,Fs); 
@@ -128,14 +128,8 @@ zAngleFromGyro = angleSpeedIntegral(zGyro,Fs);
 
 [xAngleFromAcc,yAngleFromAcc,zAngleFromAcc] = calcAngleFromAcc(xAcc,yAcc,zAcc);
 
-lowFreq = 3;
-inWindowNum = 50;
-
-windowTime = 1 / lowFreq * inWindowNum;
-windowPoint = ceil(windowTime / Ts);
-
-[Cxy,F] = mscohere(xAngleFromGyro,xAngleFromAcc,hann(windowPoint),...
-    ceil(windowPoint*0.8),windowPoint,Fs);
+[Cxy,F] = mscohere(xAngleFromGyro,xAngleFromAcc,hann(FFTLength),...
+    Overlap,FFTLength,Fs);
 figure;
 plot(F,Cxy);
 title('Magnitude-Squared Coherence X acc, X gyro');
@@ -145,8 +139,8 @@ coheFreqRange = [0.7 3.0];
 xlim(coheFreqRange);
 xPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
 
-[Cxy,F] = mscohere(yAngleFromGyro,yAngleFromAcc,hann(windowPoint),...
-    ceil(windowPoint*0.8),windowPoint,Fs);
+[Cxy,F] = mscohere(yAngleFromGyro,yAngleFromAcc,hann(FFTLength),...
+    Overlap,FFTLength,Fs);
 yPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
 figure;
 plot(F,Cxy);
@@ -155,15 +149,16 @@ xlabel('Frequency (Hz)');
 grid;
 xlim(coheFreqRange);
 
-[Cxy,F] = mscohere(zAngleFromGyro,zAngleFromAcc,hann(windowPoint),...
-    ceil(windowPoint*0.8),windowPoint,Fs);
-zPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
+[Cxy,F] = mscohere(zAngleFromGyro,zAngleFromAcc,hann(FFTLength),...
+    Overlap,FFTLength,Fs);
 figure;
 plot(F,Cxy);
 title('Magnitude-Squared Coherence Z acc, Z gyro');
 xlabel('Frequency (Hz)');
 grid;
 xlim(coheFreqRange);
+zPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
+
 
 filterOrder = 2900;
 

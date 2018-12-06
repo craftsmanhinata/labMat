@@ -21,25 +21,25 @@ RHR = 69;
 
 ECGFolder = 'ECG\';
 fileNameECG = {'2018112405move02.csv',...   %1
-    '2018112405move02.csv',...  %2
-    '2018112405move02.csv',...  %3
-    '2018112405move02.csv',...  %4
-    '2018112405move02.csv',...  %5
-    '2018112405move02.csv',...  %6
-    '2018112405move02.csv',...  %7
-    '2018112405move02.csv',...  %8
-    '2018112405move02.csv',...  %9
+%     '2018112405move02.csv',...  %2
+%     '2018112405move02.csv',...  %3
+%     '2018112405move02.csv',...  %4
+%     '2018112405move02.csv',...  %5
+%     '2018112405move02.csv',...  %6
+%     '2018112405move02.csv',...  %7
+%     '2018112405move02.csv',...  %8
+%     '2018112405move02.csv',...  %9
     '2018112405move02.csv'      %10
     };
 fileNamePPG = {'20181124_200643_Move02.csv',... %1
-    '20181124_200643_Move02.csv',...    %2
-    '20181124_200643_Move02.csv',...    %3
-    '20181124_200643_Move02.csv',...    %4
-    '20181124_200643_Move02.csv',...    %5
-    '20181124_200643_Move02.csv',...    %6
-    '20181124_200643_Move02.csv',...    %7
-    '20181124_200643_Move02.csv',...    %8
-    '20181124_200643_Move02.csv',...    %9
+%     '20181124_200643_Move02.csv',...    %2
+%     '20181124_200643_Move02.csv',...    %3
+%     '20181124_200643_Move02.csv',...    %4
+%     '20181124_200643_Move02.csv',...    %5
+%     '20181124_200643_Move02.csv',...    %6
+%     '20181124_200643_Move02.csv',...    %7
+%     '20181124_200643_Move02.csv',...    %8
+%     '20181124_200643_Move02.csv',...    %9
     '20181124_200643_Move02.csv'        %10
     };
 if length(fileNameECG) ~= length(fileNamePPG)
@@ -119,10 +119,6 @@ inertialDataArray = zeros(inertialAxis,ceil(procTime/Ts),trialLength);
 
 
 coheFreqRange = [0.7 3.0];
-lowFreq = min(freqRange);
-inWindowNum = 50;
-windowTime = 1 / lowFreq * inWindowNum;
-windowPoint = ceil(windowTime / Ts);
 filterOrder = 2900;
 
 
@@ -161,14 +157,14 @@ for index = 1 : trialLength
     zAngleFromGyro = angleSpeedIntegral(zGyro,Fs);
     [xAngleFromAcc,yAngleFromAcc,zAngleFromAcc] = calcAngleFromAcc(xAcc,yAcc,zAcc);
     
-    [Cxy,F] = mscohere(xAngleFromGyro,xAngleFromAcc,hann(windowPoint),...
-        ceil(windowPoint*0.8),windowPoint,Fs);
+    [Cxy,F] = mscohere(xAngleFromGyro,xAngleFromAcc,hann(FFTLength),...
+        Overlap,FFTLength,Fs);
     xPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
-    [Cxy,F] = mscohere(yAngleFromGyro,yAngleFromAcc,hann(windowPoint),...
-        ceil(windowPoint*0.8),windowPoint,Fs);
+    [Cxy,F] = mscohere(yAngleFromGyro,yAngleFromAcc,hann(FFTLength),...
+        Overlap,FFTLength,Fs);
     yPeakFreq = coheFindPeak(F,Cxy,coheFreqRange); 
-    [Cxy,F] = mscohere(zAngleFromGyro,zAngleFromAcc,hann(windowPoint),...
-        ceil(windowPoint*0.8),windowPoint,Fs);
+    [Cxy,F] = mscohere(zAngleFromGyro,zAngleFromAcc,hann(FFTLength),...
+        Overlap,FFTLength,Fs);
     zPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
     
     highXPass = fir1(filterOrder,xPeakFreq/(Fs/2),'high');
@@ -254,3 +250,20 @@ for trialIndex = 1 : trialLength
     end
 end
 % diary off;
+
+
+% RMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,Dict.Count);
+evalAxis = [TriAccKey TriGyroKey TriAngleKey];
+RMSEMean = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,length(evalAxis));
+RMSEResult = zeros(trialLength,1);
+for trialIndex = 1 : trialLength
+    otherDataIndex = 1:1:trialLength;
+    otherDataIndex(trialIndex) = '';
+    RMSEMean = mean(RMSEArray(otherDataIndex,1:searchFilterCoefLengthProcNum,1:NLMSStepProcNum,...
+        evalAxis));
+    %äeé≤Ç…Ç¬Ç¢Çƒç≈è¨Çï]âø
+end
+
+
+
+

@@ -24,7 +24,7 @@ for index = 1: procNum
         plot(ECGPksTime,ECGPks,'ko');
         hold off;
         drawnow;
-        pause(0.3);
+        waitforbuttonpress;
     end
     startTime = endTime;
     realHR(index) = length(ECGPks) * HRCoef;

@@ -7,7 +7,7 @@ procIndex = intersect(find((F >= minFreq)),find(F <= maxFreq));
 procFreq = F(procIndex);
 procCohe = Cxy(procIndex);
 [~,peakFreq]= findpeaks(procCohe,procFreq,'SortStr','descend','NPeaks',1);
-minFreq = peakFreq;
+maxFreq = peakFreq;
 procIndex = intersect(find((F >= minFreq)),find(F <= maxFreq));
 procFreq = F(procIndex);
 procCohe = Cxy(procIndex);
