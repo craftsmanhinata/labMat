@@ -21,25 +21,25 @@ RHR = 69;
 
 ECGFolder = 'ECG\';
 fileNameECG = {'2018112405move02.csv',...   %1
-%     '2018112405move02.csv',...  %2
-%     '2018112405move02.csv',...  %3
-%     '2018112405move02.csv',...  %4
-%     '2018112405move02.csv',...  %5
-%     '2018112405move02.csv',...  %6
-%     '2018112405move02.csv',...  %7
-%     '2018112405move02.csv',...  %8
-%     '2018112405move02.csv',...  %9
+    '2018112405move02.csv',...  %2
+    '2018112405move02.csv',...  %3
+    '2018112405move02.csv',...  %4
+    '2018112405move02.csv',...  %5
+    '2018112405move02.csv',...  %6
+    '2018112405move02.csv',...  %7
+    '2018112405move02.csv',...  %8
+    '2018112405move02.csv',...  %9
     '2018112405move02.csv'      %10
     };
 fileNamePPG = {'20181124_200643_Move02.csv',... %1
-%     '20181124_200643_Move02.csv',...    %2
-%     '20181124_200643_Move02.csv',...    %3
-%     '20181124_200643_Move02.csv',...    %4
-%     '20181124_200643_Move02.csv',...    %5
-%     '20181124_200643_Move02.csv',...    %6
-%     '20181124_200643_Move02.csv',...    %7
-%     '20181124_200643_Move02.csv',...    %8
-%     '20181124_200643_Move02.csv',...    %9
+    '20181124_200643_Move02.csv',...    %2
+    '20181124_200643_Move02.csv',...    %3
+    '20181124_200643_Move02.csv',...    %4
+    '20181124_200643_Move02.csv',...    %5
+    '20181124_200643_Move02.csv',...    %6
+    '20181124_200643_Move02.csv',...    %7
+    '20181124_200643_Move02.csv',...    %8
+    '20181124_200643_Move02.csv',...    %9
     '20181124_200643_Move02.csv'        %10
     };
 if length(fileNameECG) ~= length(fileNamePPG)
@@ -88,7 +88,9 @@ end
 
 PPGFolder = 'PPG\';
 
-searchFilterCoefLength = 10:10:500;
+%searchFilterCoefLength = 10:10:500;
+searchFilterCoefLength = 10:10:100;
+
 searchFilterCoefLengthProcNum = length(searchFilterCoefLength);
 
 NLMSMinStepSize = 0.001;
@@ -191,11 +193,13 @@ for index = 1 : trialLength
     inertialDataArray(zAngleKey,:,index) = zAngle;
 end
 
-NLMSStepProcNum = 50;
+%NLMSStepProcNum = 50;
+NLMSStepProcNum = 20;
 RMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,Dict.Count);
 
 % diary on;
 for trialIndex = 1 : trialLength
+    disp(strcat(num2str(trialIndex),'個目のデータ'));
     for filteCoeffIndex = 1:searchFilterCoefLengthProcNum
         NLMSStepSizeArray = zeros(NLMSStepProcNum,1);
         NLMSStepSizeArray(1) = NLMSMinStepSize;
@@ -203,7 +207,7 @@ for trialIndex = 1 : trialLength
             NLMSFilter = dsp.LMSFilter('Length',searchFilterCoefLength(filteCoeffIndex),...
                 'StepSize',NLMSStepSizeArray(NLMSStepSizeIndex),'Method','Normalized LMS');
             if NLMSStepSizeIndex == 1
-                NLMSMaxStepSize = maxstep(NLMSFilter,PPGDataArray(:,trialIndex));
+                NLMSMaxStepSize = 2;%maxstep(NLMSFilter,PPGDataArray(:,trialIndex));
                 NLMSStepSizeArray = logspace(log10(NLMSMinStepSize),log10(NLMSMaxStepSize),NLMSStepProcNum);
             end
             disp(strcat('FilterOrder:',num2str(searchFilterCoefLength(filteCoeffIndex))));
@@ -259,9 +263,18 @@ RMSEResult = zeros(trialLength,1);
 for trialIndex = 1 : trialLength
     otherDataIndex = 1:1:trialLength;
     otherDataIndex(trialIndex) = '';
-    RMSEMean = mean(RMSEArray(otherDataIndex,1:searchFilterCoefLengthProcNum,1:NLMSStepProcNum,...
+    RMSEMean(trialIndex,:,:,:) = mean(RMSEArray(otherDataIndex,:,:,...
         evalAxis));
     %各軸について最小を評価
+    for axisIndex = 1 : length(evalAxis)
+        curRMSEMean = reshape(RMSEMean(trialIndex,:,:,axisIndex),...
+        [searchFilterCoefLengthProcNum NLMSStepProcNum]);
+        [val,minFilterParamKey] = min(curRMSEMean(:));
+        [coefLenInd,StepInd]= ind2sub(size(curRMSEMean),minFilterParamKey);
+        disp(strcat(num2str(trialIndex),'個目のデータの',Dict(evalAxis(axisIndex)),'に対する最適パラメータ:','係数長:',num2str(searchFilterCoefLength(coefLenInd)),...
+        'ステップサイズ:',num2str(NLMSStepSizeArray(StepInd)),''));
+        disp(strcat(num2str(trialIndex),'個目のデータのRMSE:',num2str(RMSEArray(trialLength,coefLenInd,StepInd,evalAxis(axisIndex)))));
+    end
 end
 
 
