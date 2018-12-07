@@ -4,7 +4,7 @@ clc();
 
 %0x8000 min
 %0x7fff max
-fileName = '20181205_Data16';
+fileName = '20181207AngleRecord02';
 srcFolderName = '.\PPGRawData\';
 dstFolderName = '.\PPG\';
 fileExtension = '.csv';

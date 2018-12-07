@@ -93,7 +93,7 @@ searchFilterCoefLength = 10:10:100;
 
 searchFilterCoefLengthProcNum = length(searchFilterCoefLength);
 
-RLSMinForgettingFactor = 0.6;
+RLSMinForgettingFactor = 0.7;
 
 xAccKey = 1;
 yAccKey = 2;
