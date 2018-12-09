@@ -8,7 +8,7 @@ Fs = 50;
 Ts = 1 / Fs;
 
 PPGFolder = 'PPG\';
-fileNamePPG = '20181207AngleRecord02_Res.csv';
+fileNamePPG = '20181207AngleRecord08_Res.csv';
 procTime = 180;
 
 PPGData = csvread(strcat(PPGFolder,fileNamePPG));
@@ -26,108 +26,129 @@ yGyro = trimSig(yGyro,Fs,procTime);
 zGyro = PPGData(:,7);
 zGyro = trimSig(zGyro,Fs,procTime);
 
-xAngleFromGyro = angleSpeedIntegral(xGyro,Fs);
-yAngleFromGyro = angleSpeedIntegral(yGyro,Fs);
-zAngleFromGyro = angleSpeedIntegral(zGyro,Fs);
-
-[xAngleFromAcc,yAngleFromAcc,zAngleFromAcc] = calcAngleFromAcc(xAcc,yAcc,zAcc);
 
 filterOrder = 2900;
 
 minCutoffFreq = 0.1;
 maxCutoffFreq = 3.0;
-cutoffArraySize = 100;
+cutoffArraySize = 10;
 cutoffFreqArray = logspace(log10(minCutoffFreq),log10(maxCutoffFreq),cutoffArraySize);
 time = (0:1:length(xAcc)-1)*Ts;
 
 axisNum = 3;
 
-XAngleRippleArray = zeros(size(cutoffFreqArray));
-YAngleRippleArray = zeros(size(cutoffFreqArray));
-ZAngleRippleArray = zeros(size(cutoffFreqArray));
+rollAngleRippleArray = zeros(size(cutoffFreqArray));
+pitchAngleRippleArray = zeros(size(cutoffFreqArray));
+yawAngleRippleArray = zeros(size(cutoffFreqArray));
 AngleRippleArray = zeros(size(cutoffFreqArray));
+rollSpeed = zeros([length(xAcc) cutoffArraySize]);
+pitchSpeed = zeros([length(yAcc) cutoffArraySize]);
+yawSpeed = zeros([length(zAcc) cutoffArraySize]);
 
 for cutoffIndex = 1: cutoffArraySize
-    highXPass = fir1(filterOrder,cutoffFreqArray(cutoffIndex)/(Fs/2),'high');
-    lowXPass = fir1(filterOrder,cutoffFreqArray(cutoffIndex)/(Fs/2),'low');
-
-    highYPass = fir1(filterOrder,cutoffFreqArray(cutoffIndex)/(Fs/2),'high');
-    lowYPass = fir1(filterOrder,cutoffFreqArray(cutoffIndex)/(Fs/2),'low');
-
-    highZPass = fir1(filterOrder,cutoffFreqArray(cutoffIndex)/(Fs/2),'high');
-    lowZPass = fir1(filterOrder,cutoffFreqArray(cutoffIndex)/(Fs/2),'low');
-
-    FilteredXAngleFromAcc  = filtfilt(lowXPass,1,xAngleFromAcc);
-    FilteredXAngleFromGyro = filtfilt(highXPass,1,xAngleFromGyro);
-    FilteredYAngleFromAcc  = filtfilt(lowYPass,1,yAngleFromAcc);
-    FilteredYAngleFromGyro = filtfilt(highYPass,1,yAngleFromGyro);
-    FilteredZAngleFromAcc  = filtfilt(lowZPass,1,zAngleFromAcc);
-    FilteredZAngleFromGyro = filtfilt(highZPass,1,zAngleFromGyro);
-
-    XAngle = FilteredXAngleFromAcc + FilteredXAngleFromGyro';
-    YAngle = FilteredYAngleFromAcc + FilteredYAngleFromGyro';
-    ZAngle = FilteredZAngleFromAcc + FilteredZAngleFromGyro';
-
-    XAngleDeg = rad2deg(XAngle);
-    YAngleDeg = rad2deg(YAngle);
-    ZAngleDeg = rad2deg(ZAngle);
+    highPass = fir1(filterOrder,cutoffFreqArray(cutoffIndex)/(Fs/2),'high');
+    lowPass = fir1(filterOrder,cutoffFreqArray(cutoffIndex)/(Fs/2),'low');
     
-    meanXAngleDeg = mean(XAngleDeg);
-    meanYAngleDeg = mean(YAngleDeg);
-    meanZAngleDeg = mean(ZAngleDeg);
-    meanXAngleDeg = repmat(meanXAngleDeg,size(FilteredXAngleFromAcc));
-    meanYAngleDeg = repmat(meanYAngleDeg,size(FilteredYAngleFromAcc));
-    meanZAngleDeg = repmat(meanZAngleDeg,size(FilteredZAngleFromAcc));
+    if cutoffIndex == 1
+        FontSize = 30;
+        fvtool(lowPass,1,'Fs',Fs)
+        xlim([0 3.0]);
+        title('Amplitude response(dB)','FontSize',FontSize);
+        ylabel('ylabel(dB)','FontSize',FontSize);
+        ylabel('Amplitude(dB)','FontSize',FontSize);
+        xlabel('Frequency(Hz)','FontSize',FontSize);
+        set(gca,'FontSize',FontSize);
+        fvtool(highPass,1,'Fs',Fs)
+        xlim([0 3.0]);
+        title('Amplitude response(dB)','FontSize',FontSize);
+        ylabel('ylabel(dB)','FontSize',FontSize);
+        ylabel('Amplitude(dB)','FontSize',FontSize);
+        xlabel('Frequency(Hz)','FontSize',FontSize);
+        set(gca,'FontSize',FontSize);
+    end
+
+    FilteredXGyro = filtfilt(highPass,1,xGyro);
+    FilteredYGyro = filtfilt(highPass,1,yGyro);
+    FilteredZGyro = filtfilt(highPass,1,zGyro);
     
-    xAngleRipple = rms(XAngleDeg);
-    yAngleRipple = rms(YAngleDeg);
-    zAngleRipple = rms(ZAngleDeg);
+    [roll, pitch] = calcRollPitchFromAcc([xAcc yAcc zAcc]);
+    FilteredRoll = filtfilt(lowPass,1,roll);
+    FilteredPitch = filtfilt(lowPass,1,pitch);
     
-    XAngleRippleArray(cutoffIndex) = mean(xAngleRipple ./ meanXAngleDeg);
-    YAngleRippleArray(cutoffIndex) = mean(yAngleRipple ./ meanYAngleDeg);
-    ZAngleRippleArray(cutoffIndex) = mean(zAngleRipple ./ meanZAngleDeg);
-    AngleRippleArray(cutoffIndex) = mean([xAngleRipple yAngleRipple zAngleRipple]);
+    [rollSpeed(:,cutoffIndex),pitchSpeed(:,cutoffIndex),yawSpeed(:,cutoffIndex)] = calcAngleSpeed([FilteredXGyro FilteredYGyro FilteredZGyro],...
+        FilteredRoll,FilteredPitch);
+    
+    rollSpeed(:,cutoffIndex) = angleSpeedIntegral(rollSpeed(:,cutoffIndex),Fs);
+    pitchSpeed(:,cutoffIndex) = angleSpeedIntegral(pitchSpeed(:,cutoffIndex),Fs);
+    yawSpeed(:,cutoffIndex) = angleSpeedIntegral(yawSpeed(:,cutoffIndex),Fs);
+
+    
+    meanRollAngleSpeed = mean(rollSpeed(:,cutoffIndex));
+    meanPitchAngleSpeed = mean(yawSpeed(:,cutoffIndex));
+    meanYawAngleSpeed = mean(pitchSpeed(:,cutoffIndex));
+
+    
+    rollAngleRipple = rms(rollSpeed(:,cutoffIndex));
+    pitchAngleRipple = rms(pitchSpeed(:,cutoffIndex));
+    yawAngleRipple = rms(yawSpeed(:,cutoffIndex));
+    
+    rollAngleRippleArray(cutoffIndex) = abs(rollAngleRipple ./ meanRollAngleSpeed);
+    pitchAngleRippleArray(cutoffIndex) = abs(pitchAngleRipple ./ meanPitchAngleSpeed);
+    yawAngleRippleArray(cutoffIndex) = abs(yawAngleRipple ./ meanYawAngleSpeed);
+    AngleRippleArray(cutoffIndex) = mean([(rollAngleRipple) (pitchAngleRipple) (yawAngleRipple)]);
 
     disp(strcat('cufoffFrq:',num2str(cutoffFreqArray(cutoffIndex))));
     
-    disp(strcat('XAngleRipple:',num2str(xAngleRipple)));
-    disp(strcat('YAngleRipple:',num2str(yAngleRipple)));
-    disp(strcat('ZAngleRipple:',num2str(zAngleRipple)));
+    disp(strcat('RollAngleRipple:',num2str(rollAngleRipple)));
+    disp(strcat('PitchAngleRipple:',num2str(pitchAngleRipple)));
+    disp(strcat('YawAngleRipple:',num2str(yawAngleRipple)));
     disp(strcat('AngleMeanRipple:',num2str(AngleRippleArray(cutoffIndex))));
-    
-    figure();
-    plot(time,XAngleDeg);
-    hold on;
-    plot(time,YAngleDeg);
-    plot(time,ZAngleDeg);
-    line(time,meanXAngleDeg,'Color','black','LineStyle','--');
-    line(time,meanYAngleDeg,'Color','black','LineStyle','--');
-    line(time,meanZAngleDeg,'Color','black','LineStyle','--');
-    legend('XAngle','YAngle','ZAngle');
-    ylabel('Degree');
-    xlabel('time(sec.)');
-    title(strcat('cutoffFreq;',num2str(cutoffFreqArray(cutoffIndex)),'Hz'));
-    
-    figure();
-    subplot(2,1,1);
-    plot(time,rad2deg(FilteredXAngleFromAcc));
-    hold on;
-    plot(time,rad2deg(FilteredYAngleFromAcc));
-    plot(time,rad2deg(FilteredZAngleFromAcc));
-    title(strcat('Angle from Acc cutoffFreq;',num2str(cutoffFreqArray(cutoffIndex)),'Hz'));
-    ylabel('Degree');
-    xlabel('time(sec.)');
-    subplot(2,1,2);
-    plot(time,rad2deg(FilteredXAngleFromGyro));
-    hold on;
-    plot(time,deg2rad(FilteredYAngleFromGyro));
-    plot(time,deg2rad(FilteredZAngleFromGyro));
-    title(strcat('Angle change from Gyro cutoffFreq;',num2str(cutoffFreqArray(cutoffIndex)),'Hz'));
-    ylabel('Degree');
-    xlabel('time(sec.)');
 end
 
  [MinRipple,bestCutoffIndex] = min(AngleRippleArray);
  disp(strcat('best cutoff freq:',num2str(cutoffFreqArray(bestCutoffIndex)),'Hz'));
  disp(strcat('Ripple:',num2str(MinRipple)));
+ [roll, pitch] = calcRollPitchFromAcc([xAcc yAcc zAcc]);
+ [rollSpeedRaw,pitchSpeedRaw,yawSpeedRaw] = calcAngleSpeed([xGyro yGyro zGyro],roll,pitch);
+     
+ MeanRollSpeedRaw = mean(rollSpeedRaw);
+ MeanPitchSpeedRaw = mean(pitchSpeedRaw);
+ MeanYawSpeedRaw = mean(yawSpeedRaw);
+ RollRippleRaw = rms(rollSpeedRaw);
+ PitchRippleRaw = rms(pitchSpeedRaw);
+ YawRippleRaw = rms(yawSpeedRaw);
+ rippleRaw = mean([abs(RollRippleRaw / MeanRollSpeedRaw) abs(MeanPitchSpeedRaw / PitchRippleRaw) ...
+     abs(YawRippleRaw / MeanYawSpeedRaw)]);
+ 
 
+ figure();
+ axRoll = subplot(3,1,1);
+ plot(time,rollSpeed(:,bestCutoffIndex));
+ xlabel('time(sec.)');
+ ylabel('AngleSpeed(rad/sec.)');
+ axPitch = subplot(3,1,2);
+ plot(time,pitchSpeed(:,bestCutoffIndex));
+ xlabel('time(sec.)');
+ ylabel('AngleSpeed(rad/sec.)');
+ axYaw = subplot(3,1,3);
+ plot(time,yawSpeed(:,bestCutoffIndex));
+ xlabel('time(sec.)');
+ ylabel('AngleSpeed(rad/sec.)');
+ linkaxes([axRoll,axPitch,axYaw],'xy');
+
+ 
+ figure();
+ axRollRaw = subplot(3,1,1);
+ plot(time,rollSpeedRaw);
+ xlabel('time(sec.)');
+ ylabel('AngleSpeed(rad/sec.)');
+ axPitchRaw = subplot(3,1,2);
+ plot(time,pitchSpeedRaw);
+ xlabel('time(sec.)');
+ ylabel('AngleSpeed(rad/sec.)');
+ axYawRaw = subplot(3,1,3);
+ plot(time,yawSpeedRaw);
+ xlabel('time(sec.)');
+ ylabel('AngleSpeed(rad/sec.)');
+ linkaxes([axRoll,axRollRaw,axPitchRaw,axYawRaw],'xy');
+ 
