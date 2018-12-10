@@ -6,13 +6,14 @@ PPGInvOn = false;
 
 Fs = 50;
 Ts = 1 / Fs;
+FontSize = 20;
 
 ECGFolder = 'ECG\';
 fileNameECG = '2018112404stay03.csv';
 fileNamePPG = '20181124_200114_Stay03.csv';
 ECGData = csvread(strcat(ECGFolder,fileNameECG));
 ECG = ECGData(:,2);
-
+ECG = trimSig(ECG,1000,180);
 
 ECGFs = 1000;
 ECGTs = 1 / ECGFs;
@@ -45,5 +46,8 @@ figure();
 plot(RRI);
 hold on;
 plot(dRRI);
-legend('Fs=1000Hz','Fs=50Hz');
-corrcoef(RRI,dRRI)
+legend({'Fs=1000Hz','Fs=50Hz'},'FontSize',FontSize);
+[R,P] = corrcoef(RRI,dRRI)
+xlabel('Pulse Count','FontSize',FontSize);
+ylabel('Time(sec.)','FontSize',FontSize);
+set(gca,'FontSize',FontSize);

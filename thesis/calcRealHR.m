@@ -6,8 +6,8 @@ realHR = ones(procNum,1);
 startTime = 0;
 if plotIs
     figure();
-    xlabel('Time(sec)');
 end
+overlapTime = ProcTime(2) - ProcTime(1);
 for index = 1: procNum
     endTime = ProcTime(index);
     procTimeWidth = endTime - startTime;
@@ -16,7 +16,11 @@ for index = 1: procNum
     procECG = ECG(procIndex);
     procECGTime = ECGTime(procIndex);
     if plotIs
+        FontSize = 20;
         plot(procECGTime,procECG);
+        ylabel('Voltage(\muV)','FontSize',FontSize);
+        xlabel('Time(sec.)','FontSize',FontSize);
+        xlim([startTime endTime]);
     end
     [ECGPks,ECGPksTime] = findpeaks(procECG,procECGTime,'MinPeakHeight',peakHeight,'MinPeakDistance',peakDistance);
     if plotIs
@@ -24,9 +28,10 @@ for index = 1: procNum
         plot(ECGPksTime,ECGPks,'ko');
         hold off;
         drawnow;
+        set(gca,'FontSize',FontSize);
         waitforbuttonpress;
     end
-    startTime = endTime;
+    startTime = endTime - overlapTime;
     realHR(index) = length(ECGPks) * HRCoef;
 end
 
