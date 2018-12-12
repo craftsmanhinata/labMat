@@ -1,5 +1,3 @@
-%RRI‚ÆPI‚Ì”äŠr‚ğ‚·‚é
-%è‡;ECG‚Â‚¯‚é,@‚µ‚Î‚ç‚­‘Ò‚Â, PPG‚Â‚¯‚é, PPGÁ‚·, ECGÁ‚·
 
 close all;
 clear();
@@ -244,7 +242,6 @@ for trialIndex = 1 : trialLength
         end
     end
 end
-diary off;
 
 
 % RMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,Dict.Count);
@@ -268,6 +265,7 @@ for trialIndex = 1 : trialLength
     end
 end
 
+diary off;
 
 
 

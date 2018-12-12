@@ -1,15 +1,15 @@
-%RRIとPIの比較をする
-%手順;ECGつける,　しばらく待つ, PPGつける, PPG消す, ECG消す
+
 
 close all;
 clear();
 clc;
 % 
 % 
-% logFolder = 'Log\';
-% fileNameLog = 'NLMSTuning.txt';
-% diary(strcat(logFolder,fileNameLog));
-
+logFolder = 'Log\';
+fileNameLog = 'NLMSTuning.txt';
+diary(strcat(logFolder,fileNameLog));
+load('.\ECG\ECGTransitionPd.mat');
+percentage = 1;
 
 PPGInvOn = false;
 
@@ -20,27 +20,29 @@ RHR = 69;
 
 
 ECGFolder = 'ECG\';
-fileNameECG = {'2018112405move02.csv',...   %1
-    '2018112405move02.csv',...  %2
-    '2018112405move02.csv',...  %3
-    '2018112405move02.csv',...  %4
-    '2018112405move02.csv',...  %5
-    '2018112405move02.csv',...  %6
-    '2018112405move02.csv',...  %7
-    '2018112405move02.csv',...  %8
-    '2018112405move02.csv',...  %9
-    '2018112405move02.csv'      %10
+fileNameECG = {...
+    'ECG20181204_01.csv',...   %1
+    'ECG20181204_02.csv',...  %2
+    'ECG20181204_03.csv',...  %3
+    'ECG20181204_04.csv',...  %4
+    'ECG20181204_05.csv',...  %5
+    'ECG20181204_06.csv',...  %6
+    'ECG20181204_07.csv',...  %7
+    'ECG20181204_08.csv',...  %8
+    'ECG20181204_09.csv',...  %9
+    'ECG20181204_10.csv'      %10
     };
-fileNamePPG = {'20181124_200643_Move02.csv',... %1
-    '20181124_200643_Move02.csv',...    %2
-    '20181124_200643_Move02.csv',...    %3
-    '20181124_200643_Move02.csv',...    %4
-    '20181124_200643_Move02.csv',...    %5
-    '20181124_200643_Move02.csv',...    %6
-    '20181124_200643_Move02.csv',...    %7
-    '20181124_200643_Move02.csv',...    %8
-    '20181124_200643_Move02.csv',...    %9
-    '20181124_200643_Move02.csv'        %10
+fileNamePPG = {...
+    '20181204_Data01_Res.csv',... %1
+    '20181204_Data02_Res.csv',...    %2
+    '20181204_Data03_Res.csv',...    %3
+    '20181204_Data04_Res.csv',...    %4
+    '20181204_Data05_Res.csv',...    %5
+    '20181204_Data06_Res.csv',...    %6
+    '20181204_Data07_Res.csv',...    %7
+    '20181204_Data08_Res.csv',...    %8
+    '20181204_Data09_Res.csv',...    %9
+    '20181204_Data10_Res.csv'        %10
     };
 if length(fileNameECG) ~= length(fileNamePPG)
     ME = MException('MyLib:dataError', ...
@@ -69,8 +71,8 @@ freqRange = [0.7 3.0];
 
 FFTLength = 512;
 Overlap = 256;
-peakHeight = 0.03;
-peakDistance = 0.3;
+peakHeight = 30;
+peakDistance = 0.4;
 plotIs = false;
 FFTExecuteNum = floor(length(dECGTime)/Overlap)-1;
 FFTSpectrumTime = (1:1:FFTExecuteNum)*Overlap*Ts;
@@ -89,7 +91,9 @@ end
 PPGFolder = 'PPG\';
 
 %searchFilterCoefLength = 10:10:500;
-searchFilterCoefLength = 10:10:100;
+searchFilterCoefLength = divisors(length(dECG));
+searchFilterCoefLength = searchFilterCoefLength .* ((searchFilterCoefLength >= 10) .* (searchFilterCoefLength < 900));
+searchFilterCoefLength(searchFilterCoefLength == 0 ) = '';
 
 searchFilterCoefLengthProcNum = length(searchFilterCoefLength);
 
@@ -110,7 +114,7 @@ TriAngleKey = 12;
 KeyArray = 1:1:12;
 valueSet = {'xAcc','yAcc','zAcc',...
     'xGyro','yGyro','zGyro',...
-    'xAngle','yAngle','zAngle',...
+    'roll','pitch','yaw',...
     'TriAcc','TriGyro','TriAngle'};
 Dict = containers.Map(KeyArray,valueSet);
 
@@ -154,53 +158,37 @@ for index = 1 : trialLength
     zGyro = trimSig(zGyro,Fs,procTime);
     inertialDataArray(zGyroKey,:,index) = zGyro;
     
-    xAngleFromGyro = angleSpeedIntegral(xGyro,Fs);
-    yAngleFromGyro = angleSpeedIntegral(yGyro,Fs);
-    zAngleFromGyro = angleSpeedIntegral(zGyro,Fs);
-    [xAngleFromAcc,yAngleFromAcc,zAngleFromAcc] = calcAngleFromAcc(xAcc,yAcc,zAcc);
-    
-    [Cxy,F] = mscohere(xAngleFromGyro,xAngleFromAcc,hann(FFTLength),...
-        Overlap,FFTLength,Fs);
-    xPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
-    [Cxy,F] = mscohere(yAngleFromGyro,yAngleFromAcc,hann(FFTLength),...
-        Overlap,FFTLength,Fs);
-    yPeakFreq = coheFindPeak(F,Cxy,coheFreqRange); 
-    [Cxy,F] = mscohere(zAngleFromGyro,zAngleFromAcc,hann(FFTLength),...
-        Overlap,FFTLength,Fs);
-    zPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
-    
-    highXPass = fir1(filterOrder,xPeakFreq/(Fs/2),'high');
-    lowXPass = fir1(filterOrder,xPeakFreq/(Fs/2),'low');
+    cutoffFreq = 1.064;
 
-    highYPass = fir1(filterOrder,yPeakFreq/(Fs/2),'high');
-    lowYPass = fir1(filterOrder,yPeakFreq/(Fs/2),'low');
 
-    highZPass = fir1(filterOrder,zPeakFreq/(Fs/2),'high');
-    lowZPass = fir1(filterOrder,zPeakFreq/(Fs/2),'low');
+    filterOrder = 2900;
 
-    FilteredXAngleFromAcc  = filtfilt(lowXPass,1,xAngleFromAcc);
-    FilteredXAngleFromGyro = filtfilt(highXPass,1,xAngleFromGyro);
-    FilteredYAngleFromAcc  = filtfilt(lowYPass,1,yAngleFromAcc);
-    FilteredYAngleFromGyro = filtfilt(highYPass,1,yAngleFromGyro);
-    FilteredZAngleFromAcc  = filtfilt(lowZPass,1,zAngleFromAcc);
-    FilteredZAngleFromGyro = filtfilt(highZPass,1,zAngleFromGyro);
+    highPass = fir1(filterOrder,cutoffFreq/(Fs/2),'high');
+    lowPass = fir1(filterOrder,cutoffFreq/(Fs/2),'low');
 
-    xAngle = FilteredXAngleFromAcc + FilteredXAngleFromGyro';
-    inertialDataArray(xAngleKey,:,index) = xAngle;
-    yAngle = FilteredYAngleFromAcc + FilteredYAngleFromGyro';
-    inertialDataArray(yAngleKey,:,index) = yAngle;
-    zAngle = FilteredZAngleFromAcc + FilteredZAngleFromGyro';
-    inertialDataArray(zAngleKey,:,index) = zAngle;
+    FilteredXGyro = filtfilt(highPass,1,xGyro);
+    FilteredYGyro = filtfilt(highPass,1,yGyro);
+    FilteredZGyro = filtfilt(highPass,1,zGyro);
+    FilteredXAcc = filtfilt(lowPass,1,xAcc);
+    FilteredYAcc = filtfilt(lowPass,1,yAcc);
+    FilteredZAcc = filtfilt(lowPass,1,zAcc);
+
+    [roll, pitch] = calcRollPitchFromAcc([FilteredXAcc FilteredYAcc FilteredZAcc]);
+    [rollSpeed,pitchSpeed,yawSpeed] = calcAngleSpeed([FilteredXGyro FilteredYGyro FilteredZGyro],roll,pitch);
+
+    inertialDataArray(xAngleKey,:,index) = rollSpeed;
+    inertialDataArray(yAngleKey,:,index) = pitchSpeed;
+    inertialDataArray(zAngleKey,:,index) = yawSpeed;
 end
 
 %NLMSStepProcNum = 50;
-FFTLMSStepProcNum = 20;
+FFTLMSStepProcNum = 30;
 FFTLMSRMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,FFTLMSStepProcNum,Dict.Count);
 
 FFTMaxStepSize = 1;%maxstep(NLMSFilter,PPGDataArray(:,trialIndex));
 FFTStepSizeArray = logspace(log10(FFTLMSMinStepSize),log10(FFTMaxStepSize),FFTLMSStepProcNum);
 
-% diary on;
+diary on;
 for trialIndex = 1 : trialLength
     disp(strcat(num2str(trialIndex),'個目のデータ'));
     for filteCoeffIndex = 1:searchFilterCoefLengthProcNum
@@ -222,7 +210,7 @@ for trialIndex = 1 : trialLength
                     [adaptOutputSpectrum,freq,spectrumTime] = spectrogram(adaptOutput,hann(FFTLength),Overlap,FFTLength,Fs);
                     adaptOutputSpectrum = convertOneSidedSpectrum(adaptOutputSpectrum,FFTLength);
                     spectrumBuffer(:,:,axisIndex) = adaptOutputSpectrum;
-                    [estimateAdaptPulseRate]= getHRFromSpectrum(adaptOutputSpectrum,freq,freqRange,RHR);
+                    [estimateAdaptPulseRate]= getHRFromSpectrumPd(adaptOutputSpectrum,freq,freqRange,RHR,pd,percentage);
                     estimateAdaptPulseRate = estimateAdaptPulseRate * 60;
                     adaptPulseRateError = sqrt(immse(estimateAdaptPulseRate,realHRArray(:,trialIndex)));
                     disp(strcat('RMSE:',num2str(adaptPulseRateError)));
@@ -244,7 +232,7 @@ for trialIndex = 1 : trialLength
                         mixedFFTLMSSpectrum(:,:,loopCount) = spectrumBuffer(:,:,mixedIndex);
                         loopCount = loopCount + 1;
                     end
-                    [estimateAdaptTriPulseRate]= getHRFromMixedSpectrums(mixedFFTLMSSpectrum,freq,freqRange,RHR);
+                    [estimateAdaptTriPulseRate]= getHRFromMixedSpectrumsPd(mixedFFTLMSSpectrum,freq,freqRange,RHR,pd,percentage);
                     estimateAdaptTriPulseRate = estimateAdaptTriPulseRate * 60;
                     estimateAdaptTriPulseError = sqrt(immse(estimateAdaptTriPulseRate,realHRArray(:,trialIndex)));
                     FFTLMSRMSEArray(trialIndex,filteCoeffIndex,FFTLMSStepSizeIndex,axisIndex) = estimateAdaptTriPulseError;
@@ -254,7 +242,6 @@ for trialIndex = 1 : trialLength
         end
     end
 end
-% diary off;
 
 
 % RMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,Dict.Count);
@@ -278,6 +265,7 @@ for trialIndex = 1 : trialLength
     end
 end
 
+diary off;
 
 
 
