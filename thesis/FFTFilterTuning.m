@@ -6,7 +6,7 @@ clc;
 % 
 % 
 logFolder = 'Log\';
-fileNameLog = 'NLMSTuning.txt';
+fileNameLog = 'FFTTuning.txt';
 diary(strcat(logFolder,fileNameLog));
 load('.\ECG\ECGTransitionPd.mat');
 percentage = 1;
