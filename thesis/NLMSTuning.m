@@ -4,13 +4,13 @@
 close all;
 clear();
 clc;
-% 
-% 
-% logFolder = 'Log\';
-% fileNameLog = 'NLMSTuning.txt';
-% diary(strcat(logFolder,fileNameLog));
+
+
+logFolder = 'Log\';
+fileNameLog = 'NLMSTuning.txt';
+diary(strcat(logFolder,fileNameLog));
 load('.\ECG\ECGTransitionPd.mat');
-percentage = 0.1;
+percentage = 1;
 
 
 PPGInvOn = false;
@@ -22,27 +22,29 @@ RHR = 69;
 
 
 ECGFolder = 'ECG\';
-fileNameECG = {'2018112405move02.csv',...   %1
-    '2018112405move02.csv',...  %2
-    '2018112405move02.csv',...  %3
-    '2018112405move02.csv',...  %4
-    '2018112405move02.csv',...  %5
-    '2018112405move02.csv',...  %6
-    '2018112405move02.csv',...  %7
-    '2018112405move02.csv',...  %8
-    '2018112405move02.csv',...  %9
-    '2018112405move02.csv'      %10
+fileNameECG = {...
+    'ECG20181204_01.csv',...   %1
+    'ECG20181204_02.csv',...  %2
+    'ECG20181204_03.csv',...  %3
+    'ECG20181204_04.csv',...  %4
+    'ECG20181204_05.csv',...  %5
+    'ECG20181204_06.csv',...  %6
+    'ECG20181204_07.csv',...  %7
+    'ECG20181204_08.csv',...  %8
+    'ECG20181204_09.csv',...  %9
+    'ECG20181204_10.csv'      %10
     };
-fileNamePPG = {'20181124_200643_Move02.csv',... %1
-    '20181124_200643_Move02.csv',...    %2
-    '20181124_200643_Move02.csv',...    %3
-    '20181124_200643_Move02.csv',...    %4
-    '20181124_200643_Move02.csv',...    %5
-    '20181124_200643_Move02.csv',...    %6
-    '20181124_200643_Move02.csv',...    %7
-    '20181124_200643_Move02.csv',...    %8
-    '20181124_200643_Move02.csv',...    %9
-    '20181124_200643_Move02.csv'        %10
+fileNamePPG = {...
+    '20181204_Data01_Res.csv',... %1
+    '20181204_Data02_Res.csv',...    %2
+    '20181204_Data03_Res.csv',...    %3
+    '20181204_Data04_Res.csv',...    %4
+    '20181204_Data05_Res.csv',...    %5
+    '20181204_Data06_Res.csv',...    %6
+    '20181204_Data07_Res.csv',...    %7
+    '20181204_Data08_Res.csv',...    %8
+    '20181204_Data09_Res.csv',...    %9
+    '20181204_Data10_Res.csv'        %10
     };
 if length(fileNameECG) ~= length(fileNamePPG)
     ME = MException('MyLib:dataError', ...
@@ -71,8 +73,8 @@ freqRange = [0.7 3.0];
 
 FFTLength = 512;
 Overlap = 256;
-peakHeight = 0.03;
-peakDistance = 0.3;
+peakHeight = 30;
+peakDistance = 0.4;
 plotIs = false;
 FFTExecuteNum = floor(length(dECGTime)/Overlap)-1;
 FFTSpectrumTime = (1:1:FFTExecuteNum)*Overlap*Ts;
@@ -91,7 +93,9 @@ end
 PPGFolder = 'PPG\';
 
 %searchFilterCoefLength = 10:10:500;
-searchFilterCoefLength = 10:10:100;
+searchFilterCoefLength = divisors(length(dECG));
+searchFilterCoefLength = searchFilterCoefLength .* ((searchFilterCoefLength >= 10) .* (searchFilterCoefLength < 900));
+searchFilterCoefLength(searchFilterCoefLength == 0 ) = '';
 
 searchFilterCoefLengthProcNum = length(searchFilterCoefLength);
 
@@ -180,13 +184,13 @@ for index = 1 : trialLength
 end
 
 %NLMSStepProcNum = 50;
-NLMSStepProcNum = 20;
+NLMSStepProcNum = 30;
 NLMSRMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,Dict.Count);
 
 NLMSMaxStepSize = 2;%maxstep(NLMSFilter,PPGDataArray(:,trialIndex));
 NLMSStepSizeArray = logspace(log10(NLMSMinStepSize),log10(NLMSMaxStepSize),NLMSStepProcNum);
 
-% diary on;
+diary on;
 for trialIndex = 1 : trialLength
     disp(strcat(num2str(trialIndex),'ŒÂ–Ú‚Ìƒf[ƒ^'));
     for filteCoeffIndex = 1:searchFilterCoefLengthProcNum
@@ -240,7 +244,7 @@ for trialIndex = 1 : trialLength
         end
     end
 end
-% diary off;
+diary off;
 
 
 % RMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,NLMSStepProcNum,Dict.Count);

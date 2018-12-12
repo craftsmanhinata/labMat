@@ -28,8 +28,8 @@ disp(strcat('FFTステップサイズ:',num2str(FFTStepSize)));
 
 
 ECGFolder = 'ECG\';
-fileNameECG = 'ECG20181204_01.csv';
-fileNamePPG = '20181204_Data01_Res.csv';
+fileNameECG = 'ECG20181204_10.csv';
+fileNamePPG = '20181204_Data10_Res.csv';
 ECGData = csvread(strcat(ECGFolder,fileNameECG));
 ECG = ECGData(:,2);
 
