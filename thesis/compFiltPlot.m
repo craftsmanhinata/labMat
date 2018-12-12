@@ -1,6 +1,6 @@
 filterOrder = 2900;
 Fs = 50;
-cutoffFreq = 0.33446;
+cutoffFreq = 1.064;
 highPass = fir1(filterOrder,cutoffFreq/(Fs/2),'high');
 lowPass = fir1(filterOrder,cutoffFreq/(Fs/2),'low');
     

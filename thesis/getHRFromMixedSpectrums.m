@@ -18,7 +18,7 @@ for index = 1:size(spectrums,2)
         [pks,locs] = findpeaks(procSpectrum(:,index,spectrumIndex),procFreq,'SortStr','descend'...
             ,'NPeaks',5);
         if isempty(pks)
-            candEstimateHeartRate(index,spectrumIndex) = 3 * 60;
+            candEstimateHeartRate(index,spectrumIndex) = 69;
         else
             estimateHeartRateIndex = knnsearch(locs,searchFreq);
             candEstimateHeartRate(index,spectrumIndex) = locs(estimateHeartRateIndex);
@@ -32,4 +32,3 @@ for index = 1:size(spectrums,2)
     %     hold off;
 end
 end
-

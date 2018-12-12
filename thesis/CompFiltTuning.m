@@ -29,7 +29,7 @@ zGyro = trimSig(zGyro,Fs,procTime);
 
 filterOrder = 2900;
 
-minCutoffFreq = 0.3;
+minCutoffFreq = 0.7;
 maxCutoffFreq = 3.0;
 cutoffArraySize = 100;
 cutoffFreqArray = logspace(log10(minCutoffFreq),log10(maxCutoffFreq),cutoffArraySize);

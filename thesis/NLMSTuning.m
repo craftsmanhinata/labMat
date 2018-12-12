@@ -9,6 +9,8 @@ clc;
 % logFolder = 'Log\';
 % fileNameLog = 'NLMSTuning.txt';
 % diary(strcat(logFolder,fileNameLog));
+load('.\ECG\ECGTransitionPd.mat');
+percentage = 0.1;
 
 
 PPGInvOn = false;
@@ -110,7 +112,7 @@ TriAngleKey = 12;
 KeyArray = 1:1:12;
 valueSet = {'xAcc','yAcc','zAcc',...
     'xGyro','yGyro','zGyro',...
-    'xAngle','yAngle','zAngle',...
+    'roll','pitch','yaw',...
     'TriAcc','TriGyro','TriAngle'};
 Dict = containers.Map(KeyArray,valueSet);
 
@@ -154,43 +156,27 @@ for index = 1 : trialLength
     zGyro = trimSig(zGyro,Fs,procTime);
     inertialDataArray(zGyroKey,:,index) = zGyro;
     
-    xAngleFromGyro = angleSpeedIntegral(xGyro,Fs);
-    yAngleFromGyro = angleSpeedIntegral(yGyro,Fs);
-    zAngleFromGyro = angleSpeedIntegral(zGyro,Fs);
-    [xAngleFromAcc,yAngleFromAcc,zAngleFromAcc] = calcAngleFromAcc(xAcc,yAcc,zAcc);
-    
-    [Cxy,F] = mscohere(xAngleFromGyro,xAngleFromAcc,hann(FFTLength),...
-        Overlap,FFTLength,Fs);
-    xPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
-    [Cxy,F] = mscohere(yAngleFromGyro,yAngleFromAcc,hann(FFTLength),...
-        Overlap,FFTLength,Fs);
-    yPeakFreq = coheFindPeak(F,Cxy,coheFreqRange); 
-    [Cxy,F] = mscohere(zAngleFromGyro,zAngleFromAcc,hann(FFTLength),...
-        Overlap,FFTLength,Fs);
-    zPeakFreq = coheFindPeak(F,Cxy,coheFreqRange);
-    
-    highXPass = fir1(filterOrder,xPeakFreq/(Fs/2),'high');
-    lowXPass = fir1(filterOrder,xPeakFreq/(Fs/2),'low');
+    cutoffFreq = 1.064;
 
-    highYPass = fir1(filterOrder,yPeakFreq/(Fs/2),'high');
-    lowYPass = fir1(filterOrder,yPeakFreq/(Fs/2),'low');
 
-    highZPass = fir1(filterOrder,zPeakFreq/(Fs/2),'high');
-    lowZPass = fir1(filterOrder,zPeakFreq/(Fs/2),'low');
+    filterOrder = 2900;
 
-    FilteredXAngleFromAcc  = filtfilt(lowXPass,1,xAngleFromAcc);
-    FilteredXAngleFromGyro = filtfilt(highXPass,1,xAngleFromGyro);
-    FilteredYAngleFromAcc  = filtfilt(lowYPass,1,yAngleFromAcc);
-    FilteredYAngleFromGyro = filtfilt(highYPass,1,yAngleFromGyro);
-    FilteredZAngleFromAcc  = filtfilt(lowZPass,1,zAngleFromAcc);
-    FilteredZAngleFromGyro = filtfilt(highZPass,1,zAngleFromGyro);
+    highPass = fir1(filterOrder,cutoffFreq/(Fs/2),'high');
+    lowPass = fir1(filterOrder,cutoffFreq/(Fs/2),'low');
 
-    xAngle = FilteredXAngleFromAcc + FilteredXAngleFromGyro';
-    inertialDataArray(xAngleKey,:,index) = xAngle;
-    yAngle = FilteredYAngleFromAcc + FilteredYAngleFromGyro';
-    inertialDataArray(yAngleKey,:,index) = yAngle;
-    zAngle = FilteredZAngleFromAcc + FilteredZAngleFromGyro';
-    inertialDataArray(zAngleKey,:,index) = zAngle;
+    FilteredXGyro = filtfilt(highPass,1,xGyro);
+    FilteredYGyro = filtfilt(highPass,1,yGyro);
+    FilteredZGyro = filtfilt(highPass,1,zGyro);
+    FilteredXAcc = filtfilt(lowPass,1,xAcc);
+    FilteredYAcc = filtfilt(lowPass,1,yAcc);
+    FilteredZAcc = filtfilt(lowPass,1,zAcc);
+
+    [roll, pitch] = calcRollPitchFromAcc([FilteredXAcc FilteredYAcc FilteredZAcc]);
+    [rollSpeed,pitchSpeed,yawSpeed] = calcAngleSpeed([FilteredXGyro FilteredYGyro FilteredZGyro],roll,pitch);
+
+    inertialDataArray(xAngleKey,:,index) = rollSpeed;
+    inertialDataArray(yAngleKey,:,index) = pitchSpeed;
+    inertialDataArray(zAngleKey,:,index) = yawSpeed;
 end
 
 %NLMSStepProcNum = 50;
@@ -222,7 +208,7 @@ for trialIndex = 1 : trialLength
                     [adaptOutputSpectrum,freq,spectrumTime] = spectrogram(adaptOutput,hann(FFTLength),Overlap,FFTLength,Fs);
                     adaptOutputSpectrum = convertOneSidedSpectrum(adaptOutputSpectrum,FFTLength);
                     spectrumBuffer(:,:,axisIndex) = adaptOutputSpectrum;
-                    [estimateAdaptPulseRate]= getHRFromSpectrum(adaptOutputSpectrum,freq,freqRange,RHR);
+                    [estimateAdaptPulseRate]= getHRFromSpectrumPd(adaptOutputSpectrum,freq,freqRange,RHR,pd,percentage);
                     estimateAdaptPulseRate = estimateAdaptPulseRate * 60;
                     adaptPulseRateError = sqrt(immse(estimateAdaptPulseRate,realHRArray(:,trialIndex)));
                     disp(strcat('RMSE:',num2str(adaptPulseRateError)));
@@ -244,7 +230,7 @@ for trialIndex = 1 : trialLength
                         mixedNLMSSpectrum(:,:,loopCount) = spectrumBuffer(:,:,mixedIndex);
                         loopCount = loopCount + 1;
                     end
-                    [estimateAdaptTriPulseRate]= getHRFromMixedSpectrums(mixedNLMSSpectrum,freq,freqRange,RHR);
+                    [estimateAdaptTriPulseRate]= getHRFromMixedSpectrumsPd(mixedNLMSSpectrum,freq,freqRange,RHR,pd,percentage);
                     estimateAdaptTriPulseRate = estimateAdaptTriPulseRate * 60;
                     estimateAdaptTriPulseError = sqrt(immse(estimateAdaptTriPulseRate,realHRArray(:,trialIndex)));
                     NLMSRMSEArray(trialIndex,filteCoeffIndex,NLMSStepSizeIndex,axisIndex) = estimateAdaptTriPulseError;
