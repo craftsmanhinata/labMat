@@ -6,9 +6,9 @@ clear();
 clc;
 % 
 % 
-% logFolder = 'Log\';
-% fileNameLog = 'RLSTuning.txt';
-% diary(strcat(logFolder,fileNameLog));
+logFolder = 'Log\';
+fileNameLog = 'RLSTuning.txt';
+diary(strcat(logFolder,fileNameLog));
 load('.\ECG\ECGTransitionPd.mat');
 percentage = 1;
 
@@ -98,7 +98,7 @@ searchFilterCoefLength(searchFilterCoefLength == 0 ) = '';
 
 searchFilterCoefLengthProcNum = length(searchFilterCoefLength);
 
-RLSMinForgettingFactor = 0.7;
+RLSMinForgettingFactor = 0.89;
 
 xAccKey = 1;
 yAccKey = 2;
@@ -188,8 +188,11 @@ RLSRMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,RLSStepProcNum,Di
 
 RLSForgettingFactorArray = logspace(log10(RLSMinForgettingFactor),log10(1),RLSStepProcNum);
 
+accSkip = false;
+gyroSkip = false;
+angleSkip = false;
 
-% diary on;
+diary on;
 for trialIndex = 1 : trialLength
     disp(strcat(num2str(trialIndex),'å¬ñ⁄ÇÃÉfÅ[É^'));
     for filteCoeffIndex = 1:searchFilterCoefLengthProcNum
@@ -206,7 +209,15 @@ for trialIndex = 1 : trialLength
                         inertialDataArray(axisIndex,:,trialIndex)');
                     if any(isnan(adaptOutput))
                         disp('error');
-                        return
+                        RLSRMSEArray(trialIndex,filteCoeffIndex,RLSForgettingFactorIndex,axisIndex) = NaN;
+                        if axisIndex < xGyroKey
+                            accSkip = true;
+                        elseif axisIndex < xAngleKey
+                            gyroSkip = true;
+                        else
+                            angleSkip = true;
+                        end
+                        continue;
                     end
                     [adaptOutputSpectrum,freq,spectrumTime] = spectrogram(adaptOutput,hann(FFTLength),Overlap,FFTLength,Fs);
                     adaptOutputSpectrum = convertOneSidedSpectrum(adaptOutputSpectrum,FFTLength);
@@ -219,15 +230,33 @@ for trialIndex = 1 : trialLength
                     RLSFilter = dsp.RLSFilter('Length',searchFilterCoefLength(filteCoeffIndex),...
                     'ForgettingFactor',RLSForgettingFactorArray(RLSForgettingFactorIndex));
                 else
-                    mixedRLSSpectrum = zeros([size(adaptOutputSpectrum) 3]);
                     switch axisIndex
                         case TriAccKey
                             firstIndex = xAccKey;
+                            if accSkip
+                                accSkip = false;
+                                disp('error');
+                                RLSRMSEArray(trialIndex,filteCoeffIndex,RLSForgettingFactorIndex,axisIndex) = NaN;
+                                continue;
+                            end
                         case TriGyroKey
                             firstIndex = xGyroKey;
+                            if gyroSkip
+                                gyroSkip = false;
+                                disp('error');
+                                RLSRMSEArray(trialIndex,filteCoeffIndex,RLSForgettingFactorIndex,axisIndex) = NaN;
+                                continue;
+                            end
                         case TriAngleKey
                             firstIndex = xAngleKey;
+                            if angleSkip
+                                angleSkip = false;
+                                disp('error');
+                                RLSRMSEArray(trialIndex,filteCoeffIndex,RLSForgettingFactorIndex,axisIndex) = NaN;
+                                continue;
+                            end
                     end
+                    mixedRLSSpectrum = zeros([size(adaptOutputSpectrum) 3]);
                     loopCount = 1;
                     for mixedIndex = firstIndex:firstIndex+2
                         mixedRLSSpectrum(:,:,loopCount) = spectrumBuffer(:,:,mixedIndex);
@@ -266,7 +295,7 @@ for trialIndex = 1 : trialLength
     end
 end
 
-% diary off;
+diary off;
 
 
 
