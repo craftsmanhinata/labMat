@@ -261,7 +261,7 @@ for trialIndex = 1 : trialLength
         [coefLenInd,StepInd]= ind2sub(size(curRMSEMean),minFilterParamKey);
         disp(strcat(num2str(trialIndex),'個目のデータの',Dict(evalAxis(axisIndex)),'に対する最適パラメータ:','係数長:',num2str(searchFilterCoefLength(coefLenInd)),...
         'ステップサイズ:',num2str(FFTStepSizeArray(StepInd)),''));
-        disp(strcat(num2str(trialIndex),'個目のデータのRMSE:',num2str(FFTLMSRMSEArray(trialLength,coefLenInd,StepInd,evalAxis(axisIndex)))));
+        disp(strcat(num2str(trialIndex),'個目のデータのRMSE:',num2str(FFTLMSRMSEArray(trialIndex,coefLenInd,StepInd,evalAxis(axisIndex)))));
     end
 end
 
