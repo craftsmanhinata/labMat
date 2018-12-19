@@ -1,5 +1,6 @@
 %変数をロードしてから…
 clc;
+close all;
 evalAxis = [TriAccKey TriGyroKey TriAngleKey];
 NLMSRMSEMean = zeros(trialLength,searchFilterCoefLengthProcNum,FFTLMSStepProcNum,length(evalAxis));
 RMSEResponse = zeros(length(evalAxis),trialLength);
@@ -28,3 +29,20 @@ disp(strcat('ジャイロセンサのRMSEの平均値',num2str(mean(RMSEResponse(2,:)))));
 disp(strcat('ジャイロセンサのRMSEの標準偏差',num2str(std(RMSEResponse(2,:)))));
 disp(strcat('角速度のRMSEの平均値',num2str(mean(RMSEResponse(3,:)))));
 disp(strcat('角速度のRMSEの標準偏差',num2str(std(RMSEResponse(3,:)))));
+[p,tbl,stats] = anova1(RMSEResponse');
+[c,m,h,nms] = multcompare(stats,'CType','bonferroni');
+disp('加速度と角速度のt検定の結果');
+[h,p] = ttest2(RMSEResponse(1,:),RMSEResponse(2,:),'Vartype','unequal')
+
+figure();
+FontSize = 20;
+meanRes = [mean(RMSEResponse(1,:)) mean(RMSEResponse(2,:)) mean(RMSEResponse(3,:))];
+stdRes = [std(RMSEResponse(1,:)) std(RMSEResponse(2,:)) std(RMSEResponse(3,:))];
+bar(meanRes,'FaceColor', 'cyan');
+hold on;
+er = errorbar(meanRes,stdRes);
+er.Color = [0 0 0];
+er.LineStyle = 'none';
+ylabel('RMSE','FontSize',FontSize);
+set(gca,'xticklabel',{'Acceleration','Gyro','Angle Speed'});
+set(gca,'FontSize',FontSize);

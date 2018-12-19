@@ -16,10 +16,10 @@ Ts = 1 / Fs;
 FontSize = 20;
 RHR = 69;
 
-FilterLength = 100;
+FilterLength = 600;
 disp(strcat('フィルタ長:',num2str(FilterLength)));
 LMSStepSize = 0.1;
-ForgettingFactor = 1;
+ForgettingFactor = 0.895;
 FFTStepSize = 0.1;
 disp(strcat('LMSステップサイズ:',num2str(LMSStepSize)));
 disp(strcat('RLS忘却係数:',num2str(ForgettingFactor)));
@@ -54,7 +54,7 @@ FFTLength = 512;
 Overlap = 256;
 peakHeight = 30;
 peakDistance = 0.4;
-plotIs = true;
+plotIs = false;
 
 [ECGSpectrum,freq,ECGSpectrumTime] = spectrogram(dECG,hann(FFTLength),Overlap,FFTLength,Fs); 
 ECGSpectrum = convertOneSidedSpectrum(ECGSpectrum,FFTLength);
