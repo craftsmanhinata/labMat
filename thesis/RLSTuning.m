@@ -98,7 +98,7 @@ searchFilterCoefLength(searchFilterCoefLength == 0 ) = '';
 
 searchFilterCoefLengthProcNum = length(searchFilterCoefLength);
 
-RLSMinForgettingFactor = 0.7;
+RLSMinForgettingFactor = 0.85;
 
 xAccKey = 1;
 yAccKey = 2;
