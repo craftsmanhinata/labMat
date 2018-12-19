@@ -6,9 +6,9 @@ clear();
 clc;
 % 
 % 
-% logFolder = 'Log\';
-% fileNameLog = 'RLSTuning.txt';
-% diary(strcat(logFolder,fileNameLog));
+logFolder = 'Log\';
+fileNameLog = 'RLSTuning.txt';
+diary(strcat(logFolder,fileNameLog));
 load('.\ECG\ECGTransitionPd.mat');
 percentage = 1;
 
@@ -98,7 +98,7 @@ searchFilterCoefLength(searchFilterCoefLength == 0 ) = '';
 
 searchFilterCoefLengthProcNum = length(searchFilterCoefLength);
 
-RLSMinForgettingFactor = 0.78;
+RLSMinForgettingFactor = 0.895;
 
 xAccKey = 1;
 yAccKey = 2;
@@ -189,7 +189,7 @@ RLSRMSEArray = zeros(trialLength,searchFilterCoefLengthProcNum,RLSStepProcNum,Di
 RLSForgettingFactorArray = logspace(log10(RLSMinForgettingFactor),log10(1),RLSStepProcNum);
 
 
-% diary on;
+diary on;
 for trialIndex = 1 : trialLength
     disp(strcat(num2str(trialIndex),'å¬ñ⁄ÇÃÉfÅ[É^'));
     for filteCoeffIndex = 1:searchFilterCoefLengthProcNum
@@ -266,7 +266,7 @@ for trialIndex = 1 : trialLength
     end
 end
 
-% diary off;
+diary off;
 
 
 

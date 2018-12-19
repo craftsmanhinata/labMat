@@ -3,6 +3,7 @@ clc;
 close all;
 evalAxis = [TriAccKey TriGyroKey TriAngleKey];
 RLSRMSEMean = zeros(trialLength,searchFilterCoefLengthProcNum,RLSStepProcNum,length(evalAxis));
+RMSEResponse = zeros(length(evalAxis),trialLength);
 disp('RLSアルゴリズムによる評価結果');
 for trialIndex = 1 : trialLength
     otherDataIndex = 1:1:trialLength;
@@ -18,6 +19,7 @@ for trialIndex = 1 : trialLength
         disp(strcat(num2str(trialIndex),'個目のデータの',Dict(evalAxis(axisIndex)),'に対する最適パラメータ:','係数長:',num2str(searchFilterCoefLength(coefLenInd)),...
         'ステップサイズ:',num2str(RLSForgettingFactorArray(StepInd)),''));
         disp(strcat(num2str(trialIndex),'個目のデータのRMSE:',num2str(RLSRMSEArray(trialIndex,coefLenInd,StepInd,evalAxis(axisIndex)))));
+        RMSEResponse(axisIndex,trialIndex) = RLSRMSEArray(trialIndex,coefLenInd,StepInd,evalAxis(axisIndex));
     end
 end
 
