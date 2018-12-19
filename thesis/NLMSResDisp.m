@@ -35,7 +35,7 @@ disp('‰Á‘¬“x‚ÆŠp‘¬“x‚ÌtŒŸ’è‚ÌŒ‹‰Ê');
 [h,p] = ttest2(RMSEResponse(1,:),RMSEResponse(2,:),'Vartype','unequal')
 
 figure();
-FontSize = 20;
+FontSize = 50;
 meanRes = [mean(RMSEResponse(1,:)) mean(RMSEResponse(2,:)) mean(RMSEResponse(3,:))];
 stdRes = [std(RMSEResponse(1,:)) std(RMSEResponse(2,:)) std(RMSEResponse(3,:))];
 bar(meanRes,'FaceColor', 'cyan');
