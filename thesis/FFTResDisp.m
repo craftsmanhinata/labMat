@@ -44,5 +44,5 @@ er = errorbar(meanRes,stdRes);
 er.Color = [0 0 0];
 er.LineStyle = 'none';
 ylabel('RMSE','FontSize',FontSize);
-set(gca,'xticklabel',{'Acceleration','Gyro','Angle Speed'});
+set(gca,'xticklabel',{'Acceleration','Gyro','Angular Speed'});
 set(gca,'FontSize',FontSize);

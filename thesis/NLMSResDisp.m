@@ -35,7 +35,7 @@ disp('‰Á‘¬“x‚ÆŠp‘¬“x‚ÌtŒŸ’è‚ÌŒ‹‰Ê');
 [h,p] = ttest2(RMSEResponse(1,:),RMSEResponse(2,:),'Vartype','unequal')
 
 figure();
-FontSize = 50;
+FontSize = 20;
 meanRes = [mean(RMSEResponse(1,:)) mean(RMSEResponse(2,:)) mean(RMSEResponse(3,:))];
 stdRes = [std(RMSEResponse(1,:)) std(RMSEResponse(2,:)) std(RMSEResponse(3,:))];
 bar(meanRes,'FaceColor', 'cyan');
@@ -44,5 +44,5 @@ er = errorbar(meanRes,stdRes);
 er.Color = [0 0 0];
 er.LineStyle = 'none';
 ylabel('RMSE','FontSize',FontSize);
-set(gca,'xticklabel',{'Acceleration','Gyro','Angle Speed'});
+set(gca,'xticklabel',{'Acceleration','Gyro','Angular Speed'});
 set(gca,'FontSize',FontSize);
