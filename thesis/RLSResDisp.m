@@ -8,6 +8,7 @@ filterParamResponse = zeros(length(evalAxis),trialLength,paramLength);
 coefLengthParamNum = 1;
 adapParamNum = 2;
 dispDigit = 4;
+paramDisp = false;
 disp('RLSƒAƒ‹ƒSƒŠƒYƒ€‚É‚æ‚é•]‰¿Œ‹‰Ê');
 for trialIndex = 1 : trialLength
     otherDataIndex = 1:1:trialLength;
@@ -87,4 +88,33 @@ fprintf('\t\t\\label{tab:dummyLabel}\n');
 fprintf('\t\\end{center}\n');
 fprintf('\\end{table}\n');
 
-
+if paramDisp
+    fprintf('\\begin{table}[H]\n');
+    fprintf('\t\\begin{center}\n');
+    fprintf('\t\t\\caption{dummyCaption}\n');
+    fprintf('\t\t\\small \\begin{tabular}{|l||c|c|c|c|c|c|} \\hline\n');
+    tableColNum = 6;
+    tableRowNum = ceil(RLSStepProcNum / tableColNum);
+    tableCenterNum = ceil(tableRowNum / 2);
+    tableParamIndex = 1;
+    
+    for tableRowIndex = 1:tableRowNum
+        fprintf('\t\t\t');
+        if tableRowIndex == tableCenterNum
+                fprintf('\\begin{tabular}{c}Forgetting Factor $\\lambda$ \\\\in RLS Algorithm\\end{tabular}');
+        end
+        for tableColumnIndex = 1:tableColNum
+            fprintf('&{%.*f}',dispDigit,round(RLSForgettingFactorArray(tableParamIndex),dispDigit));
+            tableParamIndex = tableParamIndex + 1;
+        end
+        if tableRowIndex ~= tableRowNum
+            fprintf(' \\\\ \\cline{2-7}\n');
+        else
+            fprintf(' \\\\ \\hline\n');
+        end
+    end
+    fprintf('\t\t\\end{tabular}\n');
+    fprintf('\t\t\\label{tab:dummyLabel}\n');
+    fprintf('\t\\end{center}\n');
+    fprintf('\\end{table}\n');
+end
