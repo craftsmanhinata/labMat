@@ -50,7 +50,7 @@ hold on;
 er = errorbar(meanRes,stdRes);
 er.Color = [0 0 0];
 er.LineStyle = 'none';
-ylabel('RMSE','FontSize',FontSize);
+ylabel('RMSE (beat / min.)','FontSize',FontSize);
 set(gca,'xticklabel',{'Acceleration','Gyro','Angular Speed'});
 set(gca,'FontSize',FontSize);
 
