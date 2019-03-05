@@ -1,3 +1,6 @@
+%各適応アルゴリズムの比較用プログラム. 
+%適当に組んであるので使えないと思います.
+%実行時間計測用.
 load('.\ECG\ECGTransitionPd.mat');
 percentage = 1;
 ECGFolder = 'ECG\';

@@ -1,5 +1,5 @@
 function [peakFreq] = coheFindPeak(F,Cxy,coheFreqRange)
-%COHEFINDPEAK この関数の概要をここに記述
+%COHEFINDPEAK スペクトルコヒーレンス上でピークを探す関数
 %   詳細説明をここに記述
 minFreq = min(coheFreqRange);
 maxFreq = max(coheFreqRange);

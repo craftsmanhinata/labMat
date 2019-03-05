@@ -1,6 +1,6 @@
 function [angle] = angleSpeedIntegral(angleSpeed,Fs)
-%ANGLE この関数の概要をここに記述
-%   詳細説明をここに記述
+%ANGLE 角速度を積分するプログラム
+%   
 Ts = 1 / Fs;
 
 angle = zeros(1,length(angleSpeed)-1);

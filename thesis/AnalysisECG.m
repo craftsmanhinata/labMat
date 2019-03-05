@@ -1,3 +1,4 @@
+%ECGのデータを解析するプログラム
 close all;
 clear();
 clc;
