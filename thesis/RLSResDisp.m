@@ -1,4 +1,6 @@
 %変数をロードしてから…
+%RLSアルゴリズムによる脈拍数推定結果を表示.ワークスペースのロード後に実行する.
+
 clc;
 close all;
 evalAxis = [TriAccKey TriGyroKey TriAngleKey];

@@ -1,3 +1,5 @@
+%相補フィルタをプロットする関数
+
 filterOrder = 2900;
 Fs = 50;
 cutoffFreq = 1.064;

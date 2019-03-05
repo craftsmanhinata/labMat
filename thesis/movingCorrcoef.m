@@ -1,5 +1,5 @@
 function [R,P,D] = movingCorrcoef(X,Y)
-%MOVINGCORRCOEF ‘ŠŠÖŒW”‚ðˆÚ“®‚µ‚È‚ª‚ç‹‚ß‚é
+%MOVINGCORRCOEF "‘ŠŠÖŒW”"‚ðˆÚ“®‚µ‚È‚ª‚ç‹‚ß‚é
 %   ‘ŠŠÖŒW”‚ÌÅ‘å’l‚Æ’x‰„, P’l‚ð•Ô‚·
 if length(X) > length(Y)
     shorterSignal = Y;

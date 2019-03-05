@@ -1,6 +1,6 @@
 function [adaptOutputSpectrum,adaptOutput] = GetSpectrumUsingRLSFilt(inputX,desiredSignal,FFTLength,Overlap,...
     Fs,RLSFilterLength,ForgettingFactor)
-%ESTIMATEHRUSINGRLSFILT この関数の概要をここに記述
+%ESTIMATEHRUSINGRLSFILT RLSアルゴリズム(忘却係数つき)を用いてスペクトルを得る関数
 %   詳細説明をここに記述
 RLSFilter = dsp.RLSFilter('Length',RLSFilterLength,'ForgettingFactor',ForgettingFactor);
 [~,adaptOutput] = RLSFilter(inputX,desiredSignal);

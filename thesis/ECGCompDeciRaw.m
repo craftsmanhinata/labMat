@@ -1,3 +1,4 @@
+%ECGのデータをデシメート前後で比較を行う.
 close all;
 clear();
 clc();

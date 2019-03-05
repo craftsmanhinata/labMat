@@ -1,5 +1,5 @@
 function [diffPks,anomalyPoint,anomalyLocs] = diffPeakAnomalyDetect(pks,locs,threshold)
-%DIFFPEAK この関数の概要をここに記述
+%DIFFPEAK 閾値を元にピークの外れ値を検出する関数
 %   詳細説明をここに記述
 diffPks = diff(locs);
 anomalyPoint = zeros(length(find(diffPks > threshold))*2,1);

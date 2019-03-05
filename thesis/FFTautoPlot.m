@@ -1,5 +1,5 @@
 function [Y] = FFTautoPlot(x,Fs)
-%FFTAUTOPLOT この関数の概要をここに記述
+%FFTAUTOPLOT FFTをそれっぽくプロットしてくれる関数
 %   詳細説明をここに記述
 Y = fft(x);
 Y = fftshift(Y);

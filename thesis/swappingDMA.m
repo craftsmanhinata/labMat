@@ -1,5 +1,5 @@
 function [responseDMA] = swappingDMA(data,count)
-%SWAPPINGDMA データを交換していく
+%SWAPPINGDMA DMAのデータを前後で交換していく(検証用.)
 %   詳細説明をここに記述
 
 loopCount = floor(length(data) / count);

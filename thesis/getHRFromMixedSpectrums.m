@@ -1,5 +1,5 @@
 function [estimateHeartRate] = getHRFromMixedSpectrums(spectrums,freq,freqRange,startHeartRate)
-%GETHRFROMMIXEDSPECTRUMS この関数の概要をここに記述
+%GETHRFROMMIXEDSPECTRUMS 複数のスペクトルを使って心拍数の推定を行う関数
 %   詳細説明をここに記述
 
 minFreq = min(freqRange);

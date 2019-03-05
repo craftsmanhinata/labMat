@@ -1,5 +1,5 @@
 function [estimateHeartRate] = getHRFromSpectrumPd(spectrums,freq,freqRange,startHeartRate,Pd,percentage)
-%GETPEAKSFROMSPECTRUM この関数の概要をここに記述
+%GETPEAKSFROMSPECTRUM スペクトルから心拍数を推定, 外れ値は確率密度関数を使って除去する
 %   詳細説明をここに記述
 
 minFreq = min(freqRange);
